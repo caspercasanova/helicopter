@@ -1,6 +1,5 @@
 extends CanvasLayer
 
-@onready var health: Label = $VBoxContainer/health
 @onready var throttle: Label = $VBoxContainer/throttle
 @onready var lift_force: Label = $VBoxContainer/lift_force
 @onready var rotor_speed: Label = $VBoxContainer/rotor_speed

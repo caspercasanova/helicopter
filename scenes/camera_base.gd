@@ -1,5 +1,5 @@
 extends Node3D
-@export var Helicopter: Helicopter
+@export var helicopter: Helicopter
 @export var CAMERA_CONTROLLER : Camera3D
 @export var MOUSE_SENSITIVITY := 0.5
 @export var TILT_LOWER_LIMIT := deg_to_rad(-90)
@@ -58,9 +58,9 @@ func _cast_ray_from_camera():
 	var origin = CAMERA_CONTROLLER.project_ray_origin(mouse_pos)
 	var end = origin + CAMERA_CONTROLLER.project_ray_normal(mouse_pos) * 100
 
-	var col = get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(origin, end, Helicopter.collision_mask, [Helicopter, CAMERA_CONTROLLER]))
+	var col = get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(origin, end, helicopter.collision_mask, [helicopter, CAMERA_CONTROLLER]))
 	
 	if col.is_empty():
-		Helicopter.cursor_pointer.set_position(end)
+		helicopter.cursor_pointer.set_position(end)
 	else:
-		Helicopter.cursor_pointer.set_position(col.position)
+		helicopter.cursor_pointer.set_position(col.position)

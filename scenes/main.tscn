@@ -412,4 +412,3 @@ material = SubResource("StandardMaterial3D_jpwa2")
 
 [node name="Helicopter" parent="." instance=ExtResource("6_hfffq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 6, 0)
-weight_in_lbs = 10.0

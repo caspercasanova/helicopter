@@ -9,6 +9,8 @@ The main issue I'm facing is that **momentum dies out too quickly** when transit
 - [ ] **Dynamic Flight Model**: Update the coefficients of lift, drag, and power dynamically based on thrust and the aircraft's angle of attack.
 - [ ] **Reduce Magic Numbers**: Clean up the code by minimizing the hard-coded values and making the calculations more flexible and realistic.
 - [ ] **Math & Physics Skills**: Improve my understanding of mathematics, physics, and vector calculus to enhance the realism of the flight model.
+- [ ] **Tail + Rotor Torque**: I've reduced the torque made by the main rotor and tail rotor to zero for the time being; this need to change to be realistic
+- [ ] **Debugging Visuals**: I'd ideally like some debugging things to visualize different transforms and positions
 - [ ] **Wench System**: Implement a wench system to lift objects, which should also update the aircraft's base weight dynamically.
 - [ ] **Rotor Blade Animation**: Add rotor blade spin animation (though this is low priority for now).
 

@@ -3,14 +3,15 @@ class_name Helicopter extends RigidBody3D
 @onready var tail_rotor: Marker3D = $TailRotor
 @onready var main_rotor: Marker3D = $MainRotor
 @onready var cursor_pointer: MeshInstance3D = $CursorPointer
+@onready var tail_rotor_mesh: Node3D = $TailRotor/TailRotorMesh
+@onready var main_rotor_mesh: Node3D = $MainRotor/MainRotorMesh
 
 ### --- Exported Variables ---
 @export var weight_in_lbs: float = 10.0
 
 ### --- Constants ---
 const LBS_TO_KG: float = 0.454
-const TAIL_ROTOR_IDLE_FORCE: float = 660.0
-const TAIL_ROTOR_MAX_FORCE: float = 10.0
+const TAIL_ROTOR_MAX_FORCE: float = 100.0
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 
@@ -57,35 +58,40 @@ func _ready():
 func _process(delta):
 	UI.send_helicopter_update(self)
 	update_rotor_speed(delta)
+	spin_rotors(delta)
 
 func _unhandled_input(event):
 	if event is InputEventKey:
 		if event.pressed and event.keycode == KEY_ESCAPE:
 			get_tree().quit()
 
-func _input(event: InputEvent):
+func _input(_event: InputEvent):
 	if !hover_mode:
 		move.x = Input.get_action_strength("D") - Input.get_action_strength("A")
 		move.y = Input.get_action_strength("W") - Input.get_action_strength("S")
 		move.z = Input.get_action_strength("E") - Input.get_action_strength("Q")
 	
-	if Input.is_action_just_pressed("F"):  # Bind this action in the input map (e.g., "ui_hover_toggle" = "H" key)
+	if Input.is_action_just_pressed("F"): 
 		toggle_hover_mode()
 
 func _physics_process(delta: float) -> void:
 	if !loaded:
 		return
+	
+	update_dynamic_coefficients()
+	
 	if hover_mode:
 		var hover_vector = calculate_hover_vector()
 		apply_central_force(hover_vector)
 	else: 
 		apply_main_rotor_thrust(delta)
-		apply_tail_rotor_force(delta)
+		#apply_tail_rotor_force(delta)
 		handle_pitch(delta)
 		handle_roll(delta)
 		#handle_pitch2(delta)
 		#handle_roll2(delta)
 		apply_parasitic_drag()
+		apply_tail_rotor_force2(delta)
 
 
 func apply_main_rotor_thrust(delta: float):
@@ -93,16 +99,40 @@ func apply_main_rotor_thrust(delta: float):
 	
 	var lift_vector = main_rotor.global_transform.basis.y * lift_force * delta
 	apply_central_force(lift_vector)
-	
-	#apply_force()
 	#apply_force(lift_vector)
 
-	#main_rotor_torque = main_rotor.global_transform.basis.y * lift_force * main_rotor_radius / 60
-	main_rotor_torque = Vector3(0,0,0) * lift_force * main_rotor_radius / 60
+	# add torque to the main blade
+	main_rotor_torque = main_rotor.global_transform.basis.y * lift_force * main_rotor_radius / 60
+	#main_rotor_torque = Vector3(0,0,0) * lift_force * main_rotor_radius / 60
 	apply_torque(main_rotor_torque)
 	
 	if debug:
 		print("Lift Force: ", lift_force)
+
+func apply_tail_rotor_force2(delta: float):
+	# Calculate the torque produced by the main rotor
+	var main_rotor_torque = lift_force * main_rotor_radius
+
+	# Calculate the tail rotor force required to counteract the main rotor's torque
+	var tail_rotor_force = main_rotor_torque / tail_rotor_radius
+
+	# Apply player input for yaw (left/right rotation)
+	if move.z != 0:
+		var player_input_force = move.z * TAIL_ROTOR_MAX_FORCE
+		tail_rotor_force += player_input_force  # Add player input force to the tail rotor force
+
+	# Convert the tail rotor force into torque (to counteract the main rotor torque)
+	var tail_rotor_torque_vector = tail_rotor.global_transform.basis.y * tail_rotor_force * delta
+
+	# Apply the counter torque to stabilize the helicopter
+	apply_torque(-tail_rotor_torque_vector)
+
+	if debug:
+		print("Main Rotor Torque: ", main_rotor_torque)
+		print("Tail Rotor Force: ", tail_rotor_force)
+		print("Tail Rotor Torque Vector: ", tail_rotor_torque_vector)
+
+
 
 func apply_tail_rotor_force(delta: float):
    # Calculate the stabilizing force needed from the tail rotor to counteract main rotor torque
@@ -158,16 +188,36 @@ func handle_roll(delta: float):
 	var main_rotor_force_vector = main_rotor.global_transform.basis.z * move.x * roll_force * delta
 	apply_torque(main_rotor_force_vector)
 
-
 func handle_pitch2(delta: float) -> void:
 	var pitch_angle_change = move.y * forward_force * delta
 	var new_rotation_x = main_rotor.rotation.x + deg_to_rad(pitch_angle_change)
-	main_rotor.rotation.x = clamp(new_rotation_x, deg_to_rad(-15.0), deg_to_rad(15.0))  # Clamp in radians
+	main_rotor.rotation.x = clamp(new_rotation_x, deg_to_rad(-5.0), deg_to_rad(5.0))  # Clamp in radians
 
 func handle_roll2(delta: float):
 	var roll_angle_change = move.x * roll_force * delta
 	var new_rotation_z = main_rotor.rotation.z + deg_to_rad(roll_angle_change)
-	main_rotor.rotation.z = clamp(new_rotation_z, deg_to_rad(-15.0), deg_to_rad(15.0))
+	main_rotor.rotation.z = clamp(new_rotation_z, deg_to_rad(-5.0), deg_to_rad(5.0))
+
+
+func update_dynamic_coefficients() -> void:
+	# Calculate the helicopter's tilt angle (relative to the world up vector)
+	var up_vector = global_transform.basis.y.normalized()
+	var world_up = Vector3.UP  # This is the global up direction (0, 1, 0)
+
+	# Dot product between the helicopter's up vector and the world's up vector gives the cosine of the tilt angle
+	var cos_tilt_angle = up_vector.dot(world_up)
+
+	# Calculate the angle of attack (in radians)
+	var angle_of_attack = acos(cos_tilt_angle)
+
+	# Dynamically adjust the lift coefficient based on the tilt angle
+	lift_coefficient = max(0.0, 2.0 * cos_tilt_angle)  # Example: Lift decreases with tilt
+	drag_coefficient = 0.3 + (1.0 - cos_tilt_angle)  # Example: Drag increases with tilt
+
+	if debug:
+		print("Angle of Attack (radians): ", angle_of_attack)
+		print("Dynamic Lift Coefficient: ", lift_coefficient)
+		print("Dynamic Drag Coefficient: ", drag_coefficient)
 
 
 func update_rotor_speed(delta: float):
@@ -207,3 +257,8 @@ func calculate_hover_vector() -> Vector3:
 	# The hover thrust should be equal to the gravity force but applied in the opposite direction
 	hover_thrust = global_transform.basis.y * gravity_force 
 	return hover_thrust
+
+
+func spin_rotors(delta: float):
+	main_rotor_mesh.rotation_degrees.y += rotor_speed / 5 * delta * 360.0  # 360 degrees per second at full speed
+	tail_rotor_mesh.rotation_degrees.x += rotor_speed / 5 * delta * 360.0  # 360 degrees per second at full speed
