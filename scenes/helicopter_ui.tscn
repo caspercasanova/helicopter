@@ -1,0 +1,38 @@
+[gd_scene load_steps=2 format=3 uid="uid://dscu7s2k73eyy"]
+
+[ext_resource type="Script" path="res://scenes/helicopter_ui.gd" id="1_l5s6c"]
+
+[node name="HelicopterUi" type="CanvasLayer"]
+script = ExtResource("1_l5s6c")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_right = 206.0
+offset_bottom = 265.0
+
+[node name="throttle" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "throttle"
+
+[node name="lift_force" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "lift_force"
+
+[node name="rotor_speed" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "rotor speed"
+
+[node name="altitude" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "altitude"
+
+[node name="RightBox" type="VBoxContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -154.0
+offset_bottom = 214.0
+grow_horizontal = 0
+
+[node name="hover mode" type="Label" parent="RightBox"]
+layout_mode = 2
+text = "hover mode"
