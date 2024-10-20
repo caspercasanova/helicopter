@@ -12,7 +12,7 @@ The main issue I'm facing is that **momentum dies out too quickly** when transit
 - [ ] **Tail + Rotor Torque**: I've reduced the torque made by the main rotor and tail rotor to zero for the time being; this need to change to be realistic
 - [ ] **Debugging Visuals**: I'd ideally like some debugging things to visualize different transforms and positions
 - [ ] **Wench System**: Implement a wench system to lift objects, which should also update the aircraft's base weight dynamically.
-- [ ] **Rotor Blade Animation**: Add rotor blade spin animation (though this is low priority for now).
+- [x] **Rotor Blade Animation**: Add rotor blade spin animation (though this is low priority for now).
 
 ### Development Notes:
 - **Momentum Issue**: The helicopter currently loses momentum too quickly during descent. The solution likely involves more sophisticated modeling of aerodynamic forces.

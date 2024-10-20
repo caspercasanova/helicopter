@@ -27,9 +27,9 @@ func _process(_delta: float) -> void:
 	if !vehicle_node:
 		return
 	#assert(vehicle_speed, "The Humvee UI must have a vehicle_speed")
-	#altitude.text=("Altitude: " + str(vehicle_node.altitude))
+	altitude.text=("Altitude: " + str(vehicle_node.altitude))
 	hover_mode.text=("hover_mode: " + str(vehicle_node.hover_mode))
 	#health.text=("Health: " + str(vehicle_node.health))
 	throttle.text=("Throttle" + str(vehicle_node.throttle))
 	lift_force.text=("Lift_force" + str(vehicle_node.lift_force))
-	rotor_speed.text=("rotor_speed" + str(vehicle_node.rotor_speed))
+	rotor_speed.text=("rotor_speed" + str(vehicle_node.main_rotor_speed))
