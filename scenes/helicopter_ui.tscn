@@ -21,9 +21,29 @@ text = "lift_force"
 layout_mode = 2
 text = "rotor speed"
 
-[node name="altitude" type="Label" parent="VBoxContainer"]
+[node name="relative_altitude" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 text = "altitude"
+
+[node name="Engine Power" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Engine Power"
+
+[node name="ground_force" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Ground Force Boost: On"
+
+[node name="pitch_angle" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="roll_angle" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="g force" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="speed" type="Label" parent="VBoxContainer"]
+layout_mode = 2
 
 [node name="RightBox" type="VBoxContainer" parent="."]
 anchors_preset = 1
@@ -33,6 +53,5 @@ offset_left = -154.0
 offset_bottom = 214.0
 grow_horizontal = 0
 
-[node name="hover mode" type="Label" parent="RightBox"]
+[node name="sky_hook" type="Label" parent="RightBox"]
 layout_mode = 2
-text = "hover mode"

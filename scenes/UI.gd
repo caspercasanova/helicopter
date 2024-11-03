@@ -1,7 +1,6 @@
 extends Node
 
 
-
 signal helicopter_vehicle_updated(vehicle)
 
 

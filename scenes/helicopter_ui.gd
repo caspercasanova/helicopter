@@ -3,8 +3,14 @@ extends CanvasLayer
 @onready var throttle: Label = $VBoxContainer/throttle
 @onready var lift_force: Label = $VBoxContainer/lift_force
 @onready var rotor_speed: Label = $VBoxContainer/rotor_speed
-@onready var altitude: Label = $VBoxContainer/altitude
-@onready var hover_mode: Label = $"RightBox/hover mode"
+@onready var relative_altitude: Label = $VBoxContainer/relative_altitude
+@onready var engine_power: Label = $"VBoxContainer/Engine Power"
+@onready var ground_force: Label = $VBoxContainer/ground_force
+@onready var sky_hook: Label = $RightBox/sky_hook
+@onready var pitch_angle: Label = $VBoxContainer/pitch_angle
+@onready var roll_angle: Label = $VBoxContainer/roll_angle
+@onready var g_force: Label = $"VBoxContainer/g force"
+@onready var speed: Label = $VBoxContainer/speed
 
 
 var vehicle_node: Helicopter = null
@@ -26,10 +32,18 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if !vehicle_node:
 		return
-	#assert(vehicle_speed, "The Humvee UI must have a vehicle_speed")
-	altitude.text=("Altitude: " + str(vehicle_node.altitude))
-	hover_mode.text=("hover_mode: " + str(vehicle_node.hover_mode))
-	#health.text=("Health: " + str(vehicle_node.health))
+	# TODO: Need Total Altitude as well 
+	# TODO: Delta Altitude
+	relative_altitude.text=("relative_altitude: " + str(floor(vehicle_node.relative_altitude)))
 	throttle.text=("Throttle" + str(vehicle_node.throttle))
-	lift_force.text=("Lift_force" + str(vehicle_node.lift_force))
-	rotor_speed.text=("rotor_speed" + str(vehicle_node.main_rotor_speed))
+	rotor_speed.text=("ROTOR RPM" + str(floor(vehicle_node.main_rotor_rpm)))
+	# investigate Smooth step for this?
+	#lift_force.text=("Lift_force" + str(floor(vehicle_node.lift_force)))
+	engine_power.text=("Engine Power" +str(vehicle_node.current_engine_power))
+	ground_force.text=("Ground Force Boost: " +str(vehicle_node.ground_effect_multiplier))
+	sky_hook.text=("Sky Hook Deployed: " + str(vehicle_node.sky_hook_deployed))
+	pitch_angle.text=("Pitch Angle: " +str(vehicle_node.pitch_angle))
+	roll_angle.text=("Roll Angle: " +str(vehicle_node.roll_angle))
+	g_force.text = (str(round(vehicle_node.g_force)) + "  G")
+	speed.text = (str(round(vehicle_node.speed_km)) + "km/h")
+	

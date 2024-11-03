@@ -1,5 +1,8 @@
 # Helicopter Simulation Development
 
+
+## https://pomax.github.io/bezierinfo/ Cool Resource
+
 Currently, I'm working on replicating the helicopter flight mechanics from the game **Nuclear Option**. This project is a blend of GPT-assisted coding and my journey as a novice game developer, focusing on the nuances of helicopter flight simulation.
 
 ### Current Challenge:
@@ -9,10 +12,12 @@ The main issue I'm facing is that **momentum dies out too quickly** when transit
 - [ ] **Dynamic Flight Model**: Update the coefficients of lift, drag, and power dynamically based on thrust and the aircraft's angle of attack.
 - [ ] **Reduce Magic Numbers**: Clean up the code by minimizing the hard-coded values and making the calculations more flexible and realistic.
 - [ ] **Math & Physics Skills**: Improve my understanding of mathematics, physics, and vector calculus to enhance the realism of the flight model.
-- [ ] **Tail + Rotor Torque**: I've reduced the torque made by the main rotor and tail rotor to zero for the time being; this need to change to be realistic
+- [x] **Tail + Rotor Torque**: I've reduced the torque made by the main rotor and tail rotor to zero for the time being; this need to change to be realistic
 - [ ] **Debugging Visuals**: I'd ideally like some debugging things to visualize different transforms and positions
 - [ ] **Wench System**: Implement a wench system to lift objects, which should also update the aircraft's base weight dynamically.
 - [x] **Rotor Blade Animation**: Add rotor blade spin animation (though this is low priority for now).
+- [ ] **Power Curves**: Get used to working with and using the built in "Curve" types for things like drag and engine output
+- [ ] **Autorotation**: It may be cool to investigate how to implement some kind of Autoratation when falling, it could act as another game loop where a pilot needs to land safely incase of engine failure
 
 ### Development Notes:
 - **Momentum Issue**: The helicopter currently loses momentum too quickly during descent. The solution likely involves more sophisticated modeling of aerodynamic forces.
@@ -20,3 +25,7 @@ The main issue I'm facing is that **momentum dies out too quickly** when transit
 - **Hard-Coded Values**: Reducing the reliance on arbitrary "magic numbers" will make the flight model easier to tune and more physically accurate.
 
 This is very much a work in progress, and I'm learning as I go.
+
+
+### Cool Discovery
+Helicopter + Wench is a super fun game loop in itself.  

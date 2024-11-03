@@ -1,7 +1,7 @@
+@tool
 # Editor script to generate the materials and cube scenes using the Kenney textures in the textures folder
 extends Node
 
-@tool
 
 # Functions as a button to regenerate the materials and scenes
 @export var generate := false
