@@ -9,7 +9,7 @@ script = ExtResource("1_l5s6c")
 offset_right = 206.0
 offset_bottom = 265.0
 
-[node name="throttle" type="Label" parent="VBoxContainer"]
+[node name="collective" type="Label" parent="VBoxContainer"]
 layout_mode = 2
 text = "throttle"
 

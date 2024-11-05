@@ -28,7 +28,15 @@ G force
 Resources: https://www.copters.com/aero/torque.html
 
 """
-
+#TODO: Change this to a helicopter state variable
+# Loading, Landing, Repairing, Injured, Green Light
+enum HELICOPTER_STATE {
+	LANDED,
+	REPAIRING,
+	CARRYING_OBJECT,
+	GREEN_LIGHT,
+	CRITICAL,
+}
 
 @onready var tail_rotor: Marker3D = $Tail_Boom/TailRotor
 @onready var main_rotor_shaft: Marker3D = $MainRotorShaft
@@ -64,33 +72,34 @@ var weight: float
 var move: Vector3 = Vector3.ZERO
 var sky_hook_deployed: bool = false
 var relative_altitude: float = 0.0
+var is_on_ground: bool = false:
+	get():
+		# might need to do something smarter here
+		return relative_altitude <= 1
 
 ### Engine + Throttle 
 var engine_on: bool = false
-var is_engine_operating_above_min: bool: 
-	get():
-		return current_engine_power >= engine_spool_power
 var engine_startup_complete:bool = false
-var throttle: float = 0.0
-var throttle_acceleration: float = 4.0  # How fast the rotor speeds up
-var max_throttle: float = 100.0  # Max throttle value
-var min_throttle: float = 0.0  # Min throttle value
-@export var engine_power_curve: Curve
 var current_engine_power: float = 0.0  # Starts at 0, gradually ramps up
-@export var max_engine_power: float = 2000.0  # Maximum engine power
-@export var engine_startup_time: float = 5.0  # Time in seconds to reach full power
-var startup_timer: float = 0.0  # Tracks time elapsed during the startup process
-var is_engine_starting: bool = false  # Engine startup flag
+
+@export var engine_power_curve: Curve
+@export var max_engine_power: float = 1000.0  
+@export var engine_startup_time: float = 5.0 
+var startup_timer: float = 0.0 
+var is_engine_starting: bool = false  
 var startup_progress: float = 0.0  # Progress through the startup sequence (0.0 to 1.0)
+
 var engine_health: float = 100.0  # Starts at 100, degrades over time or events
-@export var engine_acceleration: float = 120.0  # Default value for moderate acceleration
-@export var engine_spool_power: float = 350.0  # Power level required for lift
 @export var engine_health_threshold: float = 25.0  # Threshold below which health is critical
 
 
 
 
 ### Rotor state
+var collective_pitch_response: float = .01  # Speed of pitch adjustment
+var collective_pitch: float = 0.0  # Range from 0.0 to 1.0, where 1.0 is max pitch
+var collective_acceleration: float = 1.0  # How fast the rotor speeds up
+
 var main_rotor_torque  = 0
 var main_rotor_speed: float = 0.0  # Angular velocity in radians per second
 var main_rotor_radius: float = 7.0  # meters (adjust based on your helicopter model)
@@ -127,6 +136,7 @@ var drag_coefficient: float = 0.3
 @export var total_drag_curve: Curve
 @export var translational_lift_coefficient_lateral: float = 50.0  # Left/right force
 
+@export var max_lift_coefficient: float = 1.5  # Maximum lift at full collective pitch
 
 var ground_effect_multiplier: float:
 	get():
@@ -200,12 +210,7 @@ var roll_angle: float:
 
 
 
-# Light color states
-var green_color = Color(0, 1, 0)
-var red_color = Color(1, 0, 0)
-var flashing_red = false
-var flash_timer: float = 0.0
-var flash_duration: float = 0.5  # Half a second for flashing interval
+
 
 
 
@@ -224,50 +229,51 @@ func _unhandled_input(event):
 			get_tree().quit()
 
 func _input(_event: InputEvent):
-	if Input.is_action_pressed("Shift"):
-		if(!engine_on):
-			start_engine()
-		throttle += throttle_acceleration
-	if Input.is_action_pressed("Ctrl"):
-		throttle -= throttle_acceleration
 	if Input.is_action_pressed("F"):
 		toggle_sky_hook()
-	
-	throttle = clamp(throttle, min_throttle, max_throttle)
+
+
+
 
 func _process(delta):
 	UI.send_helicopter_update(self)
 	update_rotor_speed(delta)
 	spin_rotors(delta)
-	#TODO: Change this to a helicopter state variable
-	# Loading, Landing, Repairing, Injured, Green Light
+
 	update_engine_light(delta)
+	
+	if Input.is_action_pressed("Shift"):
+		if(!engine_on):
+			start_engine()
+		collective_pitch += collective_pitch_response
+	elif Input.is_action_pressed("Ctrl"):
+		collective_pitch -= collective_pitch_response
+	collective_pitch = clamp(collective_pitch, 0.0, 1.0)
 
 
 	move.x = Input.get_action_strength("D") - Input.get_action_strength("A")
 	move.y = Input.get_action_strength("W") - Input.get_action_strength("S")
 	move.z = Input.get_action_strength("E") - Input.get_action_strength("Q")
-	
-	if Input.is_action_pressed("F"): 
-		print("Toggling Sky Hook")
+
 
 func _physics_process(delta: float) -> void:
 	if !loaded:
 		return
+
+	calculate_g_force(delta)
+	update_relative_altitude()
+	
+	update_engine_power(delta)
 	
 
 	
-	calculate_g_force(delta)
-	#update_dynamic_coefficients()
-	#update_engine_power_curve(delta)
-	update_relative_altitude()
-	update_engine_power(delta)
 	apply_main_rotor_thrust(delta)
 	apply_tail_rotor_force(delta)
+	
 	handle_pitch(delta)
 	handle_roll(delta)
 	
-	apply_tilt_based_force(delta)
+	#apply_tilt_based_force(delta)
 
 	#calculate_translational_lift()
 	#apply_parasitic_drag()
@@ -304,51 +310,55 @@ func start_engine():
 
 # TODO: Emplement spool down + engine off
 func engine_shutoff(): 
-	if(is_on_ground()):
+	if is_on_ground:
 		engine_on = false
 	return
 
 func engine_spool_up(delta: float) -> void:
 	startup_timer += delta
 	
+	# Calculate progress as a percentage of startup time, clamped between 0.0 and 1.0
 	startup_progress = clamp(startup_timer / engine_startup_time, 0.0, 1.0)
-
-	current_engine_power = lerp(0.0, engine_spool_power, startup_progress)
+	
+	# Lerp current engine power towards max engine power based on startup progress
+	current_engine_power = lerp(0.0, max_engine_power, startup_progress)
 
 	print("Spooling Up: ", round(startup_progress * 100), "%")
 
+	# Check if the startup process is complete
 	if startup_timer >= engine_startup_time:
 		is_engine_starting = false
 		engine_startup_complete = true
-		current_engine_power = engine_spool_power
-		print("Engine startup complete. Reached takeoff power.")
+		current_engine_power = max_engine_power
+		print("Engine startup complete. Reached full power.")
+
 
 func engine_spool_down(delta: float) -> void:
 	pass
 
 
+# may need somethign like this for the future health modules
+# todod remove this
 func update_engine_power(delta: float):
 	if is_engine_starting: 
 		engine_spool_up(delta)
-		return  # Exit early to avoid throttle affecting the startup
-		
-	if engine_startup_complete:
-		#var target_engine_power = (throttle / max_throttle) * max_engine_power 
-		var target_engine_power = engine_spool_power + ((throttle / max_throttle) * (max_engine_power - engine_spool_power))
-		# Smoothly interpolate engine power towards the target engine power
-		current_engine_power = lerp(current_engine_power, target_engine_power, engine_acceleration * delta)
-		
-		if debug:
-			print("Throttle: ", throttle, " Target Engine Power: ", target_engine_power, " Current Engine Power: ", current_engine_power)
+		return
+	pass
+
+
 
 func update_rotor_speed(delta: float):
 	# Target rotor speed is proportional to engine power
 	var target_rotor_speed = (current_engine_power / max_engine_power) * max_angular_velocity
 	
+		# Apply a reduction to rotor speed if collective pitch exceeds 80%
+	if collective_pitch > 0.8:
+		var load_factor = 1.0 - ((collective_pitch - 0.8) * 0.2)  # Reduce rotor speed slightly based on excess pitch
+		target_rotor_speed *= load_factor
+	
 	# Smoothly interpolate rotor speed towards the target rotor speed
 	var interpolation_speed = 3.0  
 	main_rotor_speed = lerp(main_rotor_speed, target_rotor_speed, interpolation_speed * delta)
-	
 	# Clamp the rotor speed to ensure it doesn't exceed the max allowed speed
 	main_rotor_speed = clamp(main_rotor_speed, 0.0, max_angular_velocity)
 
@@ -361,21 +371,21 @@ func update_rotor_speed(delta: float):
 
 
 func apply_main_rotor_thrust(delta: float):
+	var effective_lift_coefficient = max_lift_coefficient * collective_pitch
+	
 	# Calculate the total lift force based on rotor speed
-	var lift_force = 0.5 * air_density * pow(tip_velocity, 2) * main_rotor_area * lift_coefficient
+	var lift_force = 0.5 * air_density * pow(tip_velocity, 2) * main_rotor_area * effective_lift_coefficient
 	
-	# Get the main rotor up vector (normal to the rotor)
-	var main_rotor_vector = main_rotor_shaft.global_transform.basis.y.normalized()
 
-	# Calculate the component of lift in the upward direction (aligned with world up)
-	var cos_tilt_angle = main_rotor_vector.dot(Vector3.UP)
+	# Adjust the lift force based on the helicopter's tilt angle (use pitch and roll combined if applicable)
+	# Not sure this is appropriate
+	var tilt_adjustment = cos(pitch_angle) * cos(roll_angle)
+	var adjusted_lift_force = lift_force * tilt_adjustment
 
-	# Adjust the lift force based on tilt
-	var adjusted_lift_force = lift_force * cos_tilt_angle
-	
 	# Apply ground effect to the adjusted lift force
 	adjusted_lift_force *= ground_effect_multiplier
-
+	
+	var main_rotor_vector = main_rotor_shaft.global_transform.basis.y.normalized()
 	var upward_lift_vector = main_rotor_vector * adjusted_lift_force * delta
 	apply_central_force(upward_lift_vector)
 
@@ -392,6 +402,9 @@ func apply_main_rotor_thrust(delta: float):
 @export var translational_lift_coefficient: float = 100.0  # General translational force coefficient
 @export var translational_force_multiplier: float = 2.0  # Additional multiplier for more responsive control
 
+
+# Adding a dead zone is probably the right move
+# Must account for front and back
 func apply_tilt_based_force(delta: float) -> void:
 	# Get the main rotor's up vector to determine the rotor tilt
 	var rotor_up_vector = main_rotor_shaft.global_transform.basis.y.normalized()
@@ -435,10 +448,6 @@ func apply_tilt_based_force(delta: float) -> void:
 
 
 
-
-
-
-
 func apply_tail_rotor_force(delta: float):
 	# Calculate the main rotor torque
 	var tail_rotor_force = (main_rotor_torque / tail_rotor_radius)
@@ -472,7 +481,7 @@ func apply_drag_force(delta: float) -> void:
 
 
 
-
+# Might need something like this in the future
 func update_dynamic_coefficients() -> void:
 	# Calculate the helicopter's tilt angle (relative to the world up vector)
 	var up_vector = main_rotor_shaft.global_transform.basis.y.normalized()
@@ -498,7 +507,7 @@ func calculate_g_force(delta: float):
 	previous_velocity = linear_velocity  # Update previous velocity for the next frame
 
 	if debug:
-		print("G-force:", g_force)
+		print("G-force:  ", g_force)
 	
 	return g_force
 
@@ -522,7 +531,6 @@ func spin_rotors(delta: float):
    # Convert radians per second (main_rotor_speed) to degrees per second
 	var degrees_per_second = main_rotor_speed * (180 / PI)
 
-	# Update the rotation of the main rotor
 	main_rotor_shaft_mesh.rotation_degrees.y += degrees_per_second * delta
 
 	# Assuming the tail rotor spins at a faster rate than the main rotor (based on helicopter design),
@@ -535,7 +543,6 @@ func spin_rotors(delta: float):
 func update_relative_altitude() -> void:
 	var max_altitude = 1000.0
 	var space_state = get_world_3d().direct_space_state
-	# Define the raycast parameters
 	var query = PhysicsRayQueryParameters3D.create(global_transform.origin, global_transform.origin + Vector3(0, -max_altitude, 0))
 	query.exclude = [self]
 	query.collision_mask = 1
@@ -555,19 +562,21 @@ func update_relative_altitude() -> void:
 		relative_altitude = max_altitude
 
 
-func is_on_ground() -> bool:
-	# check is slowing throttle down
-	# if holding down brake for 5 seconds turns off helicopter
-	# if relative alt < 1
-
-	return false
 
 
 
+
+# Light color states
+var green_color = Color(0, 1, 0)
+var red_color = Color(1, 0, 0)
+var orange_color = Color(0.945, 0.557, 0.02)
+var flashing_red = false
+var flash_timer: float = 0.0
+var flash_duration: float = 0.5  # Half a second for flashing interval
 
 func update_engine_light(delta: float):
 	if engine_health > engine_health_threshold and engine_startup_complete and sky_hook_deployed:
-		print("flashing orange") 
+		engine_light.mesh.material.albedo_color = orange_color
 	elif engine_health < engine_health_threshold:
 		# Flashing red light for critical engine health
 		flash_timer += delta

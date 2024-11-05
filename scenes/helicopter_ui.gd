@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-@onready var throttle: Label = $VBoxContainer/throttle
+@onready var collective: Label = $VBoxContainer/collective
 @onready var lift_force: Label = $VBoxContainer/lift_force
 @onready var rotor_speed: Label = $VBoxContainer/rotor_speed
 @onready var relative_altitude: Label = $VBoxContainer/relative_altitude
@@ -35,7 +35,7 @@ func _process(_delta: float) -> void:
 	# TODO: Need Total Altitude as well 
 	# TODO: Delta Altitude
 	relative_altitude.text=("relative_altitude: " + str(floor(vehicle_node.relative_altitude)))
-	throttle.text=("Throttle" + str(vehicle_node.throttle))
+	collective.text=("collective" + str(vehicle_node.collective_pitch))
 	rotor_speed.text=("ROTOR RPM" + str(floor(vehicle_node.main_rotor_rpm)))
 	# investigate Smooth step for this?
 	#lift_force.text=("Lift_force" + str(floor(vehicle_node.lift_force)))
