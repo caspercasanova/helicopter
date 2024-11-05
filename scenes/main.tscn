@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://bp7xy2o1ccgsl"]
+[gd_scene load_steps=17 format=3 uid="uid://bp7xy2o1ccgsl"]
 
 [ext_resource type="Texture2D" uid="uid://bjki20y2o2s7c" path="res://addons/kenney_prototype_tools/textures/dark/texture_01.png" id="1_2xps0"]
 [ext_resource type="Texture2D" uid="uid://ntiu66svity3" path="res://addons/kenney_prototype_tools/textures/red/texture_01.png" id="2_w5hpf"]
@@ -8,7 +8,6 @@
 [ext_resource type="PackedScene" uid="uid://di1np6mf845jg" path="res://scenes/helicopter.tscn" id="6_hfffq"]
 [ext_resource type="PackedScene" uid="uid://cym4y2mt8yvyy" path="res://scenes/RigidBox.tscn" id="7_feefi"]
 [ext_resource type="PackedScene" uid="uid://bju36pfggog4t" path="res://scenes/Helipad.tscn" id="8_06t6e"]
-[ext_resource type="PackedScene" uid="uid://1f6h5nyoa1xs" path="res://scenes/pueblo_broken.tscn" id="9_mbf6f"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_v3d8d"]
 
@@ -415,13 +414,10 @@ transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 75.812
 size = Vector3(28, 5, 10)
 material = SubResource("StandardMaterial3D_jpwa2")
 
-[node name="RigidBody3D" parent="." instance=ExtResource("7_feefi")]
+[node name="HeavyObject" parent="." instance=ExtResource("7_feefi")]
 
 [node name="Helipad" parent="." instance=ExtResource("8_06t6e")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.6, 29.9, -18)
-
-[node name="pueblo_broken" parent="." instance=ExtResource("9_mbf6f")]
-transform = Transform3D(-0.866025, 0, -0.5, 0, 1, 0, 0.5, 0, -0.866025, 73, 1, 66)
 
 [node name="Helicopter" parent="." instance=ExtResource("6_hfffq")]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 58, 32, -20)

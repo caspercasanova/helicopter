@@ -162,37 +162,7 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_A"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_A"]
-linear_limit_spring_x/enabled = true
-linear_limit_spring_x/frequency = 1.0
-linear_limit_spring_x/damping = 0.1
-linear_limit_spring_y/enabled = true
-linear_limit_spring_y/frequency = 1.0
-linear_limit_spring_y/damping = 0.1
-linear_limit_spring_z/enabled = true
-linear_limit_spring_z/frequency = 1.0
-linear_limit_spring_z/damping = 0.1
-linear_motor_x/enabled = true
-linear_motor_y/enabled = true
-linear_motor_z/enabled = true
-linear_spring_x/enabled = true
-linear_spring_x/damping = 100.0
-linear_spring_y/enabled = true
-linear_spring_y/damping = 100.0
-linear_spring_z/enabled = true
-linear_spring_z/damping = 100.0
-angular_motor_x/enabled = true
-angular_motor_x/target_velocity = 0.00174533
-angular_motor_y/enabled = true
-angular_motor_y/target_velocity = 0.00174533
-angular_motor_z/enabled = true
-angular_motor_z/target_velocity = 0.00174533
-angular_spring_x/enabled = true
-angular_spring_x/damping = 0.1
-angular_spring_y/enabled = true
-angular_spring_y/damping = 0.1
-angular_spring_z/enabled = true
-angular_spring_z/damping = 0.1
+[node name="JoltGeneric6DOFJoint3D" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_A"]
 node_a = NodePath("../../..")
 node_b = NodePath("..")
 
@@ -206,22 +176,7 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_B"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_B"]
-linear_motor_x/enabled = true
-linear_motor_y/enabled = true
-linear_motor_z/enabled = true
-linear_spring_x/enabled = true
-linear_spring_x/damping = 100.0
-linear_spring_y/enabled = true
-linear_spring_y/damping = 100.0
-linear_spring_z/enabled = true
-linear_spring_z/damping = 100.0
-angular_motor_x/enabled = true
-angular_motor_y/enabled = true
-angular_motor_z/enabled = true
-angular_spring_x/enabled = true
-angular_spring_y/enabled = true
-angular_spring_z/enabled = true
+[node name="JoltGeneric6DOFJoint3D" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_B"]
 node_a = NodePath("../../Tail_Boom_Section_A")
 node_b = NodePath("..")
 
@@ -235,22 +190,7 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_C"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_C"]
-linear_motor_x/enabled = true
-linear_motor_y/enabled = true
-linear_motor_z/enabled = true
-linear_spring_x/enabled = true
-linear_spring_x/damping = 100.0
-linear_spring_y/enabled = true
-linear_spring_y/damping = 100.0
-linear_spring_z/enabled = true
-linear_spring_z/damping = 100.0
-angular_motor_x/enabled = true
-angular_motor_y/enabled = true
-angular_motor_z/enabled = true
-angular_spring_x/enabled = true
-angular_spring_y/enabled = true
-angular_spring_z/enabled = true
+[node name="JoltGeneric6DOFJoint3D" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_C"]
 node_a = NodePath("../../Tail_Boom_Section_B")
 node_b = NodePath("..")
 
@@ -267,25 +207,6 @@ mesh = SubResource("CylinderMesh_ccio1")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_D"]
 shape = SubResource("ConvexPolygonShape3D_20max")
-
-[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_D"]
-linear_motor_x/enabled = true
-linear_motor_y/enabled = true
-linear_motor_z/enabled = true
-linear_spring_x/enabled = true
-linear_spring_x/damping = 100.0
-linear_spring_y/enabled = true
-linear_spring_y/damping = 100.0
-linear_spring_z/enabled = true
-linear_spring_z/damping = 100.0
-angular_motor_x/enabled = true
-angular_motor_y/enabled = true
-angular_motor_z/enabled = true
-angular_spring_x/enabled = true
-angular_spring_y/enabled = true
-angular_spring_z/enabled = true
-node_a = NodePath("../../Tail_Boom_Section_C")
-node_b = NodePath("..")
 
 [node name="MainRotorShaft" type="Marker3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -9.29681e-08, 1.10001, -2.12686)

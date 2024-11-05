@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bo1ogwrklkd0k"]
-
-[ext_resource type="Script" path="res://scenes/FixedJoint.gd" id="1_snlh1"]
-
-[node name="FixedJoint" type="Node3D"]
-script = ExtResource("1_snlh1")
