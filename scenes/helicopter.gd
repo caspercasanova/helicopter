@@ -61,11 +61,11 @@ enum HELICOPTER_STATE {
 	CRITICAL,
 }
 
-@onready var tail_rotor: Marker3D = $Tail_Boom/TailRotor
+@export var tail_rotor_marker: Marker3D
 @onready var main_rotor_shaft: Marker3D = $MainRotorShaft
 @onready var main_rotor_shaft_mesh: MeshInstance3D = $MainRotorShaft/MainRotorShaftMesh
 @onready var cursor_pointer: MeshInstance3D = $CursorPointer
-@onready var tail_rotor_mesh: Node3D = $Tail_Boom/TailRotor/TailRotorMesh
+@export var tail_rotor_mesh: Node3D
 @onready var engine_light: MeshInstance3D = $EngineLight
 @onready var sky_hook_attachment: MeshInstance3D = $Sky_Hook_Attachment
 
@@ -506,11 +506,11 @@ func apply_tail_rotor_force(delta: float):
 	# Calculate the main rotor torque
 	var tail_rotor_force = (main_rotor_torque / tail_rotor_radius)
 
-	var tail_rotor_torque_vector = tail_rotor.global_transform.basis.y * tail_rotor_force * delta
+	var tail_rotor_torque_vector = tail_rotor_marker.global_transform.basis.y * tail_rotor_force * delta
 
 	if move.z != 0:
 		# Convert player input into a vector to modify the tail rotor force
-		var player_input_force = tail_rotor.global_transform.basis.y * (move.z * TAIL_ROTOR_MAX_FORCE * delta)
+		var player_input_force = tail_rotor_marker.global_transform.basis.y * (move.z * TAIL_ROTOR_MAX_FORCE * delta)
 		# Adjust tail rotor force with player input for yaw control
 		tail_rotor_torque_vector += player_input_force
 
