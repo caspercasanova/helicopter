@@ -1,8 +1,9 @@
-[gd_scene load_steps=31 format=3 uid="uid://di1np6mf845jg"]
+[gd_scene load_steps=32 format=3 uid="uid://di1np6mf845jg"]
 
 [ext_resource type="Script" path="res://scenes/helicopter.gd" id="1_7xf6l"]
 [ext_resource type="Script" path="res://scenes/camera_base.gd" id="2_4wjwm"]
 [ext_resource type="PackedScene" uid="uid://dscu7s2k73eyy" path="res://scenes/helicopter_ui.tscn" id="2_y1icg"]
+[ext_resource type="Script" path="res://scenes/helicopter_component.gd" id="3_irkl7"]
 
 [sub_resource type="Curve" id="Curve_qr4xs"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.411215, 0.437577), 1.7787, 1.7787, 0, 0, Vector2(0.660436, 0.734858), 0.286568, 0.286568, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
@@ -161,9 +162,16 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_A"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="Generic6DOFJoint3D" type="Generic6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_A"]
-node_a = NodePath("../../..")
-node_b = NodePath("..")
+[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_A"]
+linear_limit_spring_x/enabled = true
+linear_limit_spring_x/frequency = 1.0
+linear_limit_spring_x/damping = 0.1
+linear_limit_spring_y/enabled = true
+linear_limit_spring_y/frequency = 1.0
+linear_limit_spring_y/damping = 0.1
+linear_limit_spring_z/enabled = true
+linear_limit_spring_z/frequency = 1.0
+linear_limit_spring_z/damping = 0.1
 linear_motor_x/enabled = true
 linear_motor_y/enabled = true
 linear_motor_z/enabled = true
@@ -174,11 +182,19 @@ linear_spring_y/damping = 100.0
 linear_spring_z/enabled = true
 linear_spring_z/damping = 100.0
 angular_motor_x/enabled = true
+angular_motor_x/target_velocity = 0.00174533
 angular_motor_y/enabled = true
+angular_motor_y/target_velocity = 0.00174533
 angular_motor_z/enabled = true
+angular_motor_z/target_velocity = 0.00174533
 angular_spring_x/enabled = true
+angular_spring_x/damping = 0.1
 angular_spring_y/enabled = true
+angular_spring_y/damping = 0.1
 angular_spring_z/enabled = true
+angular_spring_z/damping = 0.1
+node_a = NodePath("../../..")
+node_b = NodePath("..")
 
 [node name="Tail_Boom_Section_B" type="RigidBody3D" parent="Tail_Boom"]
 transform = Transform3D(1, 0, 0, 0, 0.0871558, -0.996195, 0, 0.996195, 0.0871558, 0, 0.387156, 1.09619)
@@ -190,10 +206,7 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_B"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="JoltGeneric6DOFJoint3D" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_B"]
-linear_limit_spring_x/enabled = true
-linear_limit_spring_y/enabled = true
-linear_limit_spring_z/enabled = true
+[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_B"]
 linear_motor_x/enabled = true
 linear_motor_y/enabled = true
 linear_motor_z/enabled = true
@@ -222,10 +235,7 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_C"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="JoltGeneric6DOFJoint3D" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_C"]
-linear_limit_spring_x/enabled = true
-linear_limit_spring_y/enabled = true
-linear_limit_spring_z/enabled = true
+[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_C"]
 linear_motor_x/enabled = true
 linear_motor_y/enabled = true
 linear_motor_z/enabled = true
@@ -246,7 +256,11 @@ node_b = NodePath("..")
 
 [node name="Tail_Boom_Section_D" type="RigidBody3D" parent="Tail_Boom"]
 transform = Transform3D(1, 0, 0, 0, 0.0871558, -0.996195, 0, 0.996195, 0.0871558, 0, 0.561467, 3.28858)
+can_sleep = false
 freeze_mode = 1
+contact_monitor = true
+max_contacts_reported = 3
+script = ExtResource("3_irkl7")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Tail_Boom/Tail_Boom_Section_D"]
 mesh = SubResource("CylinderMesh_ccio1")
@@ -254,10 +268,7 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_D"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="JoltGeneric6DOFJoint3D" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_D"]
-linear_limit_spring_x/enabled = true
-linear_limit_spring_y/enabled = true
-linear_limit_spring_z/enabled = true
+[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_D"]
 linear_motor_x/enabled = true
 linear_motor_y/enabled = true
 linear_motor_z/enabled = true
@@ -347,5 +358,6 @@ mesh = SubResource("CylinderMesh_38ykb")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0.6, -0.2, 0)
 mesh = SubResource("CylinderMesh_38ykb")
 
+[connection signal="body_entered" from="Tail_Boom/Tail_Boom_Section_D" to="Tail_Boom/Tail_Boom_Section_D" method="_on_body_entered"]
 [connection signal="body_entered" from="MainRotorShaft/MainRotorShaftMesh/Prop1" to="." method="_on_prop_1_body_entered"]
 [connection signal="body_entered" from="MainRotorShaft/MainRotorShaftMesh/Prop2" to="." method="_on_prop_2_body_entered"]

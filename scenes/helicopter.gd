@@ -1,34 +1,57 @@
 class_name Helicopter extends RigidBody3D
-
+## An attempt at making a fun physics based helicopter 
+## 
+## Still plenty to do, Note that flight is currently super unstable 
+## and speeds/drag are not implemented properly if at all. 
+## 
+## @tutorial(Reading Resource 1	): https://www.copters.com/aero/torque.html
+## @experimental
 
 """
+Num of TODO's as of 11/5/2024: 25-35-ish
 
-Add some kind of vortex condition where if the current velocity is opposit of he updaward velocity, then reduce upward coefficient 
 
-TODO: Rework Thrust and Engine Startup 
+Add some kind of vortex condition where if the current velocity is opposite of he updaward velocity, then reduce upward coefficient 
+
+TODO: Proper Conditions where rotor speed falls and increases (currently we hardcode based on whether we increase collective to above 80%)
+TODO: [x] Engine Spool Down / Turn Off 
+	- Double check math
+	- Can probably reduce the number of variables there are too many currently
+
 TODO: Translational Lift / Movement
-TODO: Drag & Engine Curves
+TODO: Understand and implement Drag? 
+TODO: Refactor to an engine Engine Curve?
 TODO: Ground Effect?
 TODO: Autorotation?
 TODO: Cleaner version of prop damage -> Component Damage "System"
-TODO: Clean the rest of these variables, refactor and reorganize 
-TODO: "Force-Per-Prop" Lite™ Implementation
+TODO: Maybe split the lift vector by the prop count and apply every revolution? (maybe not idk) "Force-Per-Prop" Lite™ Implementation
+TODO: Aerodynamics
+	- Roll  / Pitch control factors?
+TODO: Hover mode for picking things up
 
-TODO: AI Implementation 
-	Maybe limitting it to 6 degrees of movement that are super stable 
+TODO: Overall flight feels lame still and hard
 
-TODO: Overall flight feels lame still
+TODO: Solve Joint Bouncyness
 
+
+TODO: Cohesive Helicopter Module / Health System 
 
 TODO: Variables Needed. 
-AoA, 
-Air Speed
-G force
+	- AoA 
+	- Sea Level Altitude
 
-Resources: https://www.copters.com/aero/torque.html
+TODO: Clean the rest of these variables, refactor and reorganize 
+
+---
+Dream TODOs:
+TODO: Rigid body AI Implementation?
+	- We could maybe limit the AI to hard set amount of degrees of rotational freedom to keep flight super stable. Maybe IDK. 
+
+TODO: Clean + Polished UI
+TODO: Make shareable DEMO
 
 """
-#TODO: Change this to a helicopter state variable
+# TODO: Change this to a helicopter state variable
 # Loading, Landing, Repairing, Injured, Green Light
 enum HELICOPTER_STATE {
 	LANDED,
@@ -67,6 +90,8 @@ var GRAVITY = ProjectSettings.get_setting("physics/3d/default_gravity")
 const PITCH_FORCE_COEFFICIENT: float = 100000.0
 const ROLL_FORCE_COEFFICIENT: float = 30000.0
 
+
+
 ### State Variables
 var weight: float
 var move: Vector3 = Vector3.ZERO
@@ -76,77 +101,11 @@ var is_on_ground: bool = false:
 	get():
 		# might need to do something smarter here
 		return relative_altitude <= 1
-
-### Engine + Throttle 
-var engine_on: bool = false
-var engine_startup_complete:bool = false
-var current_engine_power: float = 0.0  # Starts at 0, gradually ramps up
-
-@export var engine_power_curve: Curve
-@export var max_engine_power: float = 1000.0  
-@export var engine_startup_time: float = 5.0 
-var startup_timer: float = 0.0 
-var is_engine_starting: bool = false  
-var startup_progress: float = 0.0  # Progress through the startup sequence (0.0 to 1.0)
-
-var engine_health: float = 100.0  # Starts at 100, degrades over time or events
-@export var engine_health_threshold: float = 25.0  # Threshold below which health is critical
-
-
-
-
-### Rotor state
-var collective_pitch_response: float = .01  # Speed of pitch adjustment
-var collective_pitch: float = 0.0  # Range from 0.0 to 1.0, where 1.0 is max pitch
-var collective_acceleration: float = 1.0  # How fast the rotor speeds up
-
-var main_rotor_torque  = 0
-var main_rotor_speed: float = 0.0  # Angular velocity in radians per second
-var main_rotor_radius: float = 7.0  # meters (adjust based on your helicopter model)
-var tail_rotor_radius: float = 1.0  # meters (distance from the center of the tail rotor to the blade tip)
-var main_rotor_area: float = 168.0  # Example rotor area in m²
-var main_rotor_rpm: float:
-	get():
-		return (main_rotor_speed / TAU) * 60.0
-
-@export var max_angular_velocity: float = 5.4 * TAU  # Max angular velocity in radians per second (40 revolutions per second)
-var tip_velocity: float:
-	get():
-		return main_rotor_speed * main_rotor_radius
-
-
-
-
-
-
-
-### Lift Forces
 var speed_km: float = 0:
 	get():
 		return linear_velocity.length() * 3.6
-
 var g_force: float = 0.0
 var previous_velocity: Vector3 = Vector3.ZERO
-var main_rotor_lift_force: float = 0.0
-var air_density: float = 1.225  # kg/m³ (air density at sea level)
-var reference_area: float = 5.0  # m² (frontal area exposed to the air)
-var lift_coefficient: float = 1.5  # Example coefficient of lift
-var drag_coefficient: float = 0.3
-
-@export var total_drag_curve: Curve
-@export var translational_lift_coefficient_lateral: float = 50.0  # Left/right force
-
-@export var max_lift_coefficient: float = 1.5  # Maximum lift at full collective pitch
-
-var ground_effect_multiplier: float:
-	get():
-		var altitude_ratio = relative_altitude / main_rotor_radius
-		var multiplier = 1.0
-		
-		if altitude_ratio < 1.0:  # Ground effect is strongest within one rotor radius from the ground
-			multiplier = 1.0 + (1.0 - altitude_ratio) * 0.5  # Amplifies the lift by up to 50%
-		return multiplier
-
 
 # Calculate the pitch angle of the helicopter relative to the world
 var pitch_angle: float:
@@ -164,7 +123,6 @@ var pitch_angle: float:
 		# Calculate the pitch angle (in radians)
 		var _angle = acos(cos_pitch)
 
-		
 		# Use cross product to determine the sign of the pitch angle
 		var right_vector = global_transform.basis.x  # Helicopter's right vector
 		if right_vector.dot(world_up.cross(forward_vector)) < 0:
@@ -182,7 +140,6 @@ var roll_angle: float:
 		# Project the up vector onto the horizontal plane defined by the world up vector
 		var up_projected = (up_vector - up_vector.dot(world_up) * world_up).normalized()
 		
-	
 		# Calculate the roll angle as the angle between the up vector and its projection
 		var cos_roll = up_vector.dot(world_up)
 		cos_roll = clamp(cos_roll, -1.0, 1.0)  # Ensure acos is within valid range
@@ -201,10 +158,86 @@ var roll_angle: float:
 
 
 
+
+### Engine
+@export var engine_power_curve: Curve
+var current_engine_power: float = 0.0
+var max_engine_power: float = 1000.0  
+ 
+
+var engine_on: bool = false
+var engine_spool_up_complete:bool = false
+var engine_spool_down_complete: bool = false
+var engine_startup_time: float = 5.0
+var engine_shut_off_timer: float = 0
+
+var engine_spool_up_timer: float = 0.0 
+var engine_spool_down_timer: float = 0.0
+
+var is_engine_spooling_up: bool = false  
+var engine_startup_progress: float = 0.0  # Progress through the startup sequence (0.0 to 1.0)
+
+var engine_spool_down_time: float = 0.0 
+var is_engine_spooling_down: bool = false
+var engine_spool_down_progress: float = 0.0
+
+var engine_health: float = 100.0  # Starts at 100, degrades over events
+var engine_health_threshold: float = 25.0  # Threshold below which health is critical
+
+
+
+
+### Rotor state
+var collective_pitch_response: float = .01  # Speed of pitch adjustment
+var collective_pitch: float = 0.0  # Range from 0.0 to 1.0, where 1.0 is max pitch
+var collective_acceleration: float = 1.0  # How fast the rotor speeds up
+
+var main_rotor_torque  = 0
+var main_rotor_speed: float = 0.0  # Angular velocity in radians per second
+var main_rotor_radius: float = 7.0  # meters (adjust based on your helicopter model)
+var tail_rotor_radius: float = 1.0  # meters (distance from the center of the tail rotor to the blade tip)
+var main_rotor_area: float = 168.0  # Example rotor area in m²
+var main_rotor_rpm: float:
+	get():
+		return (main_rotor_speed / TAU) * 60.0
+
+var max_rotor_angular_velocity: float = 5.4 * TAU  # Max angular velocity in radians per second (40 revolutions per second)
+var tip_velocity: float:
+	get():
+		return main_rotor_speed * main_rotor_radius
+
+
+
+
+
+
+
+### Lift Forces
+@export var total_drag_curve: Curve
+
+@export var max_lift_coefficient: float = 1.5  # Maximum lift at full collective pitch
+
+var main_rotor_lift_force: float = 0.0
+var air_density: float = 1.225  # kg/m³ (air density at sea level)
+var reference_area: float = 5.0  # m² (frontal area exposed to the air)
+var lift_coefficient: float = 1.5  # Example coefficient of lift
+var drag_coefficient: float = 0.3
+
+var ground_effect_multiplier: float:
+	get():
+		var altitude_ratio = relative_altitude / main_rotor_radius
+		var multiplier = 1.0
+		
+		if altitude_ratio < 1.0:  # Ground effect is strongest within one rotor radius from the ground
+			multiplier = 1.0 + (1.0 - altitude_ratio) * 0.5  # Amplifies the lift by up to 50%
+		return multiplier
+
+
+
+### Aerodynamics / Control Factor
 ### Control factor can essentially be "Aero dynamics"
 @export var max_tilt_angle: float = 60.0  # Maximum allowed tilt angle before control reduces
 @export var max_speed_for_control: float = 30.0  # Maximum speed before control authority is reduced
-
 
 
 
@@ -248,7 +281,17 @@ func _process(delta):
 		collective_pitch += collective_pitch_response
 	elif Input.is_action_pressed("Ctrl"):
 		collective_pitch -= collective_pitch_response
+		if (engine_on and is_on_ground and collective_pitch <= 0):
+			engine_shut_off_timer += delta
+			print("Spooling down progres", engine_shut_off_timer)
+			if engine_shut_off_timer >= 5:
+				engine_shutoff()
+		else: 
+			engine_shut_off_timer = 0
+
+		
 	collective_pitch = clamp(collective_pitch, 0.0, 1.0)
+	
 
 
 	move.x = Input.get_action_strength("D") - Input.get_action_strength("A")
@@ -259,11 +302,15 @@ func _process(delta):
 func _physics_process(delta: float) -> void:
 	if !loaded:
 		return
-
-	calculate_g_force(delta)
-	update_relative_altitude()
 	
-	update_engine_power(delta)
+	if is_engine_spooling_up: 
+		engine_spool_up(delta)
+	elif is_engine_spooling_down:
+		engine_spool_down(delta)
+	
+
+	calculate_relative_altitude()
+	calculate_g_force(delta)
 	
 
 	
@@ -301,55 +348,62 @@ func handle_roll(delta: float):
 
 
 
-# Initialize the startup process
 func start_engine():
-	startup_timer = 0.0
+	engine_spool_up_timer = 0.0
 	engine_on = true
-	is_engine_starting = true
+	is_engine_spooling_up = true
 	current_engine_power = 0.0
 
-# TODO: Emplement spool down + engine off
+
 func engine_shutoff(): 
-	if is_on_ground:
-		engine_on = false
+	engine_on = false
+	is_engine_spooling_down = true
 	return
 
 func engine_spool_up(delta: float) -> void:
-	startup_timer += delta
+	engine_spool_up_timer += delta
 	
 	# Calculate progress as a percentage of startup time, clamped between 0.0 and 1.0
-	startup_progress = clamp(startup_timer / engine_startup_time, 0.0, 1.0)
+	engine_startup_progress = clamp(engine_spool_up_timer / engine_startup_time, 0.0, 1.0)
 	
 	# Lerp current engine power towards max engine power based on startup progress
-	current_engine_power = lerp(0.0, max_engine_power, startup_progress)
+	current_engine_power = lerp(0.0, max_engine_power, engine_startup_progress)
 
-	print("Spooling Up: ", round(startup_progress * 100), "%")
+	print("Spooling Up: ", round(engine_startup_progress * 100), "%")
 
 	# Check if the startup process is complete
-	if startup_timer >= engine_startup_time:
-		is_engine_starting = false
-		engine_startup_complete = true
+	if engine_startup_progress >= 1:
+		is_engine_spooling_up = false
+		engine_spool_up_complete = true
 		current_engine_power = max_engine_power
 		print("Engine startup complete. Reached full power.")
 
 
 func engine_spool_down(delta: float) -> void:
-	pass
+	# TODO: There are division by zero bugs in here sometimes
+	print('engine spool down process')
+	engine_spool_down_timer += delta
 
-
-# may need somethign like this for the future health modules
-# todod remove this
-func update_engine_power(delta: float):
-	if is_engine_starting: 
-		engine_spool_up(delta)
-		return
-	pass
+	engine_spool_down_progress = clamp(engine_spool_down_timer / engine_spool_down_time, 0.0, 1.0)
+	# Lerp current engine power towards 0 based on time
+	current_engine_power = lerp(current_engine_power, 0.0, engine_spool_down_progress)
+	# Check if the startup process is complete
+	
+	print("Spooling Down: ", round(engine_spool_down_progress * 100), "%")
+	
+	if engine_spool_down_progress >= 1:
+		is_engine_spooling_down = false
+		engine_spool_down_complete = true
+		current_engine_power = 0.0
+		print("Engine shutoff complete. Reached zero power.")
+	
+pass
 
 
 
 func update_rotor_speed(delta: float):
 	# Target rotor speed is proportional to engine power
-	var target_rotor_speed = (current_engine_power / max_engine_power) * max_angular_velocity
+	var target_rotor_speed = (current_engine_power / max_engine_power) * max_rotor_angular_velocity
 	
 		# Apply a reduction to rotor speed if collective pitch exceeds 80%
 	if collective_pitch > 0.8:
@@ -360,7 +414,7 @@ func update_rotor_speed(delta: float):
 	var interpolation_speed = 3.0  
 	main_rotor_speed = lerp(main_rotor_speed, target_rotor_speed, interpolation_speed * delta)
 	# Clamp the rotor speed to ensure it doesn't exceed the max allowed speed
-	main_rotor_speed = clamp(main_rotor_speed, 0.0, max_angular_velocity)
+	main_rotor_speed = clamp(main_rotor_speed, 0.0, max_rotor_angular_velocity)
 
    # Calculate RPM for debug purposes
 	if debug:
@@ -404,7 +458,7 @@ func apply_main_rotor_thrust(delta: float):
 
 
 # Adding a dead zone is probably the right move
-# Must account for front and back
+# Must account for front and back left and right
 func apply_tilt_based_force(delta: float) -> void:
 	# Get the main rotor's up vector to determine the rotor tilt
 	var rotor_up_vector = main_rotor_shaft.global_transform.basis.y.normalized()
@@ -460,7 +514,6 @@ func apply_tail_rotor_force(delta: float):
 		# Adjust tail rotor force with player input for yaw control
 		tail_rotor_torque_vector += player_input_force
 
-	# Apply the total tail rotor torque (negated to counteract main rotor torque)
 	apply_torque(-tail_rotor_torque_vector)
 
 
@@ -500,20 +553,11 @@ func update_dynamic_coefficients() -> void:
 	#translational_lift_coefficient = max(0.0, 0.1 * cos_tilt_angle)
 
 
-func calculate_g_force(delta: float):
-	# Calculate acceleration based on change in velocity and delta time
-	var acceleration = (linear_velocity - previous_velocity).length() / delta
-	g_force = acceleration / GRAVITY
-	previous_velocity = linear_velocity  # Update previous velocity for the next frame
-
-	if debug:
-		print("G-force:  ", g_force)
-	
-	return g_force
 
 
 
-# TODO: Move this to global variables
+
+# TODO: Move this to global variables or make useful
 # Gradually reduce control authority based on angle and speed
 func calculate_control_factor(angle: float, speed: float) -> float:
 	# Calculate the factor by which control is reduced
@@ -527,20 +571,21 @@ func calculate_control_factor(angle: float, speed: float) -> float:
 
 
 
-func spin_rotors(delta: float):
-   # Convert radians per second (main_rotor_speed) to degrees per second
-	var degrees_per_second = main_rotor_speed * (180 / PI)
 
-	main_rotor_shaft_mesh.rotation_degrees.y += degrees_per_second * delta
+func calculate_g_force(delta: float):
+	# Calculate acceleration based on change in velocity and delta time
+	var acceleration = (linear_velocity - previous_velocity).length() / delta
+	g_force = acceleration / GRAVITY
+	previous_velocity = linear_velocity  # Update previous velocity for the next frame
 
-	# Assuming the tail rotor spins at a faster rate than the main rotor (based on helicopter design),
-	# you may want to multiply the main rotor speed by a constant to simulate the faster tail rotor spin.
-	var tail_rotor_multiplier = 6.0 
-	var tail_degrees_per_second = main_rotor_speed * tail_rotor_multiplier * (180 / PI)
+	if debug:
+		print("G-force:  ", g_force)
+	
+	return g_force
 
-	tail_rotor_mesh.rotation_degrees.x += tail_degrees_per_second * delta
 
-func update_relative_altitude() -> void:
+
+func calculate_relative_altitude() -> void:
 	var max_altitude = 1000.0
 	var space_state = get_world_3d().direct_space_state
 	var query = PhysicsRayQueryParameters3D.create(global_transform.origin, global_transform.origin + Vector3(0, -max_altitude, 0))
@@ -566,6 +611,21 @@ func update_relative_altitude() -> void:
 
 
 
+func spin_rotors(delta: float):
+   # Convert radians per second (main_rotor_speed) to degrees per second
+	var degrees_per_second = main_rotor_speed * (180 / PI)
+
+	main_rotor_shaft_mesh.rotation_degrees.y += degrees_per_second * delta
+
+	# Assuming the tail rotor spins at a faster rate than the main rotor (based on helicopter design),
+	# you may want to multiply the main rotor speed by a constant to simulate the faster tail rotor spin.
+	var tail_rotor_multiplier = 6.0 
+	var tail_degrees_per_second = main_rotor_speed * tail_rotor_multiplier * (180 / PI)
+
+	tail_rotor_mesh.rotation_degrees.x += tail_degrees_per_second * delta
+
+
+
 # Light color states
 var green_color = Color(0, 1, 0)
 var red_color = Color(1, 0, 0)
@@ -575,7 +635,7 @@ var flash_timer: float = 0.0
 var flash_duration: float = 0.5  # Half a second for flashing interval
 
 func update_engine_light(delta: float):
-	if engine_health > engine_health_threshold and engine_startup_complete and sky_hook_deployed:
+	if engine_health > engine_health_threshold and engine_spool_up_complete and sky_hook_deployed:
 		engine_light.mesh.material.albedo_color = orange_color
 	elif engine_health < engine_health_threshold:
 		# Flashing red light for critical engine health
@@ -584,7 +644,7 @@ func update_engine_light(delta: float):
 			flashing_red = !flashing_red  # Toggle flashing state
 			flash_timer = 0.0
 		engine_light.mesh.material.albedo_color = red_color if flashing_red else Color(1, 1, 1)  # Flash red and white
-	elif engine_startup_complete:
+	elif engine_spool_up_complete:
 		# Set the engine light to green when engine power is sufficient for lift
 		engine_light.mesh.material.albedo_color = green_color
 	else:
