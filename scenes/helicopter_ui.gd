@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var roll_angle: Label = $VBoxContainer/roll_angle
 @onready var g_force: Label = $"VBoxContainer/g force"
 @onready var speed: Label = $VBoxContainer/speed
+@onready var hover_mode: Label = $RightBox/hover_mode
 
 
 var vehicle_node: Helicopter = null
@@ -19,7 +20,7 @@ func _init():
 	UI.connect("helicopter_vehicle_updated", _vehicle_changed)
 	
 
-func _vehicle_changed(data):
+func _vehicle_changed(data: Helicopter):
 	vehicle_node = data
 
 
@@ -46,4 +47,4 @@ func _process(_delta: float) -> void:
 	roll_angle.text=("Roll Angle: " +str(vehicle_node.roll_angle))
 	g_force.text = (str(round(vehicle_node.g_force)) + "  G")
 	speed.text = (str(round(vehicle_node.speed_km)) + "km/h")
-	
+	hover_mode.text = ("Hover Mode Engaged: "+ str(vehicle_node.hover_mode))

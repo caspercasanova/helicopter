@@ -77,6 +77,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59.4077, 14.6105, 5)
 size = Vector3(10, 30, 10)
 material = SubResource("StandardMaterial3D_gyxum")
 
+[node name="CSGBox3D47" type="CSGBox3D" parent="CSGCombiner3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -58.4077, 32.1105, -8.5)
+size = Vector3(4, 29, 5)
+material = SubResource("StandardMaterial3D_gyxum")
+
 [node name="CSGBox3D3" type="CSGBox3D" parent="CSGCombiner3D"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59.4077, 14.6105, 19.7085)
 size = Vector3(10, 30, 10)
@@ -415,18 +420,17 @@ size = Vector3(28, 5, 10)
 material = SubResource("StandardMaterial3D_jpwa2")
 
 [node name="HeavyObject" parent="." instance=ExtResource("7_feefi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 25, -96)
+
+[node name="HeavyObject2" parent="." instance=ExtResource("7_feefi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58, 31, -33)
+
+[node name="HeavyObject3" parent="." instance=ExtResource("7_feefi")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 21.4809, -36)
 
 [node name="Helipad" parent="." instance=ExtResource("8_06t6e")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.6, 29.9, -18)
 
 [node name="Helicopter" parent="." instance=ExtResource("6_hfffq")]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 58, 32, -20)
-weight_in_lbs = 10000.0
-max_lift_coefficient = 1.5
-max_tilt_angle = 60.0
 max_speed_for_control = 30.0
-tilt_dead_zone = 0.05
-translational_lift_coefficient = 100.0
-translational_force_multiplier = 2.0
-prop1_health = 100.0
-prop2_health = 100.0

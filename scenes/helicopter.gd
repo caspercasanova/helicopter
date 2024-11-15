@@ -17,9 +17,13 @@ TODO: Proper Conditions where rotor speed falls and increases (currently we hard
 TODO: [x] Engine Spool Down / Turn Off 
 	- Double check math
 	- Can probably reduce the number of variables there are too many currently
-
+TODO: We need to somehow apply a damping Anti Torque from the tail rotor, or some kind of auto leveling force so hitting "Q/E" doesn't send u spinning
 TODO: Translational Lift / Movement
-TODO: Understand and implement Drag? 
+	- Adding a dead zone is probably the right move
+
+TODO: Understand and implement induced drag? 
+TODO: Understand and implement vortex ring state
+TODO: Understand and implement retreating blade stall
 TODO: Refactor to an engine Engine Curve?
 TODO: Ground Effect?
 TODO: Autorotation?
@@ -28,6 +32,8 @@ TODO: Maybe split the lift vector by the prop count and apply every revolution? 
 TODO: Aerodynamics
 	- Roll  / Pitch control factors?
 TODO: Hover mode for picking things up
+	- Balances Helicopter 
+	- Limits Yaw and Pitch to 5 degrees or something 
 
 TODO: Overall flight feels lame still and hard
 
@@ -53,13 +59,15 @@ TODO: Make shareable DEMO
 """
 # TODO: Change this to a helicopter state variable
 # Loading, Landing, Repairing, Injured, Green Light
-enum HELICOPTER_STATE {
+enum HELICOPTER_LIGHT_STATES {
 	LANDED,
 	REPAIRING,
 	CARRYING_OBJECT,
 	GREEN_LIGHT,
 	CRITICAL,
 }
+
+
 
 @export var tail_rotor_marker: Marker3D
 @onready var main_rotor_shaft: Marker3D = $MainRotorShaft
@@ -96,6 +104,7 @@ const ROLL_FORCE_COEFFICIENT: float = 30000.0
 var weight: float
 var move: Vector3 = Vector3.ZERO
 var sky_hook_deployed: bool = false
+var hover_mode: bool = false
 var relative_altitude: float = 0.0
 var is_on_ground: bool = false:
 	get():
@@ -106,6 +115,9 @@ var speed_km: float = 0:
 		return linear_velocity.length() * 3.6
 var g_force: float = 0.0
 var previous_velocity: Vector3 = Vector3.ZERO
+var speed_magnitude: float:
+	get:
+		return linear_velocity.length()
 
 # Calculate the pitch angle of the helicopter relative to the world
 var pitch_angle: float:
@@ -221,7 +233,7 @@ var main_rotor_lift_force: float = 0.0
 var air_density: float = 1.225  # kg/m³ (air density at sea level)
 var reference_area: float = 5.0  # m² (frontal area exposed to the air)
 var lift_coefficient: float = 1.5  # Example coefficient of lift
-var drag_coefficient: float = 0.3
+var drag_coefficient: float = 100
 
 var ground_effect_multiplier: float:
 	get():
@@ -229,7 +241,7 @@ var ground_effect_multiplier: float:
 		var multiplier = 1.0
 		
 		if altitude_ratio < 1.0:  # Ground effect is strongest within one rotor radius from the ground
-			multiplier = 1.0 + (1.0 - altitude_ratio) * 0.5  # Amplifies the lift by up to 50%
+			multiplier = 1.0 + (1.0 - altitude_ratio) * 0.1  # Amplifies the lift by up to 50%
 		return multiplier
 
 
@@ -237,9 +249,7 @@ var ground_effect_multiplier: float:
 ### Aerodynamics / Control Factor
 ### Control factor can essentially be "Aero dynamics"
 @export var max_tilt_angle: float = 60.0  # Maximum allowed tilt angle before control reduces
-@export var max_speed_for_control: float = 30.0  # Maximum speed before control authority is reduced
-
-
+@export var max_speed_for_control: float = 10.0  # Maximum speed before control authority is reduced
 
 
 
@@ -264,6 +274,8 @@ func _unhandled_input(event):
 func _input(_event: InputEvent):
 	if Input.is_action_pressed("F"):
 		toggle_sky_hook()
+	if Input.is_action_pressed("C"):
+		toggle_hover_mode()
 
 
 
@@ -274,6 +286,7 @@ func _process(delta):
 	spin_rotors(delta)
 
 	update_engine_light(delta)
+
 	
 	if Input.is_action_pressed("Shift"):
 		if(!engine_on):
@@ -320,11 +333,10 @@ func _physics_process(delta: float) -> void:
 	handle_pitch(delta)
 	handle_roll(delta)
 	
+	apply_drag_force(delta)
 	#apply_tilt_based_force(delta)
-
 	#calculate_translational_lift()
 	#apply_parasitic_drag()
-	#apply_drag_force(delta)
  
 
 # Perhaps these need to take into account the current velocity vector? 
@@ -450,57 +462,6 @@ func apply_main_rotor_thrust(delta: float):
 
 
 
-#region Currrent Code Experimentation
-
-@export var tilt_dead_zone: float = 0.05  # Dead zone for pitch and roll angles to prevent drift
-@export var translational_lift_coefficient: float = 100.0  # General translational force coefficient
-@export var translational_force_multiplier: float = 2.0  # Additional multiplier for more responsive control
-
-
-# Adding a dead zone is probably the right move
-# Must account for front and back left and right
-func apply_tilt_based_force(delta: float) -> void:
-	# Get the main rotor's up vector to determine the rotor tilt
-	var rotor_up_vector = main_rotor_shaft.global_transform.basis.y.normalized()
-
-	# Determine if the helicopter is upside down by checking the dot product with the world up vector
-	var is_upside_down = rotor_up_vector.dot(Vector3.UP) < 0
-
-	# Project the rotor up vector onto the XZ plane to get the horizontal component of tilt
-	var horizontal_tilt_vector = rotor_up_vector - rotor_up_vector.dot(Vector3.UP) * Vector3.UP
-
-	# Check if horizontal_tilt_vector is effectively zero to prevent unintended force
-	if horizontal_tilt_vector.length() < tilt_dead_zone:
-		print("In dead zone")
-		horizontal_tilt_vector = Vector3.ZERO  # Set to zero if within dead zone
-
-	# Normalize the horizontal tilt vector if it's not zero
-	horizontal_tilt_vector = horizontal_tilt_vector.normalized() if horizontal_tilt_vector.length() > 0 else Vector3.ZERO
-
-	# Invert the horizontal tilt vector if the helicopter is upside down
-	if is_upside_down:
-		horizontal_tilt_vector = -horizontal_tilt_vector
-
-	# Calculate the translational force based on the tilt vector
-	var translational_force = horizontal_tilt_vector * translational_lift_coefficient * current_engine_power * translational_force_multiplier
-
-	# Zero out any unintended vertical component
-	translational_force.y = 0
-
-	# Apply ground effect multiplier when close to the ground
-	translational_force *= ground_effect_multiplier
-
-	# Debug output to confirm the calculated forces
-	print("Horizontal tilt vector:", horizontal_tilt_vector)
-	print("Translational force applied:", translational_force)
-
-	# Apply the translational force at the center of mass to move the helicopter
-	apply_central_force(translational_force * delta)
-
-#endregion
-
-
-
 
 func apply_tail_rotor_force(delta: float):
 	# Calculate the main rotor torque
@@ -517,17 +478,12 @@ func apply_tail_rotor_force(delta: float):
 	apply_torque(-tail_rotor_torque_vector)
 
 
-
-
 func apply_drag_force(delta: float) -> void:
-	# Calculate the helicopter's forward velocity component
-	var forward_velocity = linear_velocity.dot(global_transform.basis.z)
-	
-	# Sample the drag value from the total drag curve based on normalized forward speed
-	var drag_value = total_drag_curve.sample(forward_velocity / max_speed_for_control)
-	
-	# Calculate the drag force magnitude directly
-	var drag_force_magnitude = 0.5 * air_density * pow(forward_velocity, 2) * drag_coefficient * reference_area * drag_value
+	# Calculate speed as the magnitude of the linear velocity
+	var speed = linear_velocity.length()
+
+	# Adjust drag to increase with the square or cube of speed for stronger high-speed resistance
+	var drag_force_magnitude = 0.5 * air_density * pow(speed, 3) * drag_coefficient * reference_area
 	
 	# Apply the drag force in the opposite direction of movement
 	apply_central_force(-linear_velocity.normalized() * drag_force_magnitude * delta)
@@ -664,6 +620,13 @@ func toggle_sky_hook():
 		rope_instance.queue_free()
 		rope_instance = null
 		sky_hook_deployed = false
+	
+
+func toggle_hover_mode():
+	if !hover_mode:
+		hover_mode = true
+	else:
+		hover_mode = false
 	
 
 

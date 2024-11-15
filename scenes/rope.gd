@@ -4,6 +4,11 @@ extends JoltPinJoint3D
 
 var has_object = false
 
+
+"""
+TODO: Figure out how to attach the object and align the thing to the Latch_Point
+"""
+
 func _on_connection_point_area_body_entered(body: Node3D) -> void:
 	if !has_object and body is RigidBody3D and body.name != "Connection_Point" and body.name != "Rope_Rigid":
 		print("Attaching to point: ", body)

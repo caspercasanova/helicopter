@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://di1np6mf845jg"]
+[gd_scene load_steps=32 format=3 uid="uid://di1np6mf845jg"]
 
 [ext_resource type="Script" path="res://scenes/helicopter.gd" id="1_7xf6l"]
 [ext_resource type="Script" path="res://scenes/camera_base.gd" id="2_4wjwm"]
@@ -11,6 +11,9 @@ point_count = 3
 
 [sub_resource type="BoxMesh" id="BoxMesh_u6syh"]
 size = Vector3(1, 1, 3)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_kfm46"]
+points = PackedVector3Array(0.5, 0.5, 1.5, 0.5, -0.5, 1.5, 0.5, 0.5, -1.5, -0.5, 0.5, 1.5, -0.5, -0.5, 1.5, 0.5, -0.5, -1.5, -0.5, 0.5, -1.5, -0.5, -0.5, -1.5)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_y8uhb"]
 height = 0.98
@@ -108,19 +111,38 @@ total_drag_curve = SubResource("Curve_yvbh8")
 
 [node name="HelicopterUi" parent="." instance=ExtResource("2_y1icg")]
 
-[node name="Body" type="MeshInstance3D" parent="."]
+[node name="Fuselage" type="Node3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -9.29681e-08, 0, -2.12686)
-mesh = SubResource("BoxMesh_u6syh")
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="Body"]
+[node name="Body" type="RigidBody3D" parent="Fuselage"]
+script = ExtResource("3_irkl7")
+
+[node name="Body" type="MeshInstance3D" parent="Fuselage/Body"]
+mesh = SubResource("BoxMesh_u6syh")
+skeleton = NodePath("../../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Fuselage/Body"]
+shape = SubResource("ConvexPolygonShape3D_kfm46")
+
+[node name="Joint" type="JoltHingeJoint3D" parent="Fuselage/Body"]
+limit_enabled = true
+node_a = NodePath("../../..")
+node_b = NodePath("..")
+solver_velocity_iterations = 2
+solver_position_iterations = 2
+transform = Transform3D(1, 1.42109e-14, 0, -1.42109e-14, 1, 0, 0, 0, 1, -5.96047e-08, -2.38419e-07, 1.49012e-08)
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="Fuselage"]
 transform = Transform3D(-4.37114e-08, 1, -8.74228e-08, -1, -4.37114e-08, -8.74228e-08, -8.74228e-08, 8.74228e-08, 1, -1.22392e-07, 0, 1.4)
 mesh = SubResource("CylinderMesh_y8uhb")
+skeleton = NodePath("../Body/Body")
 
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="Body"]
+[node name="MeshInstance3D3" type="MeshInstance3D" parent="Fuselage"]
 transform = Transform3D(1, 8.44439e-08, 6.47961e-08, -8.44439e-08, 0.258819, 0.965926, 6.47961e-08, -0.965926, 0.258819, 0, 0.4, 0)
 mesh = SubResource("CylinderMesh_207jq")
+skeleton = NodePath("../Body/Body")
 
-[node name="MeshInstance3D4" type="MeshInstance3D" parent="Body"]
+[node name="MeshInstance3D4" type="MeshInstance3D" parent="Fuselage"]
 transform = Transform3D(-1, -3.15008e-14, 8.74228e-08, 4.79616e-14, 1, 1.49012e-08, -8.74228e-08, 1.49012e-08, -1, -9.06204e-08, 0.5, -0.0268579)
 mesh = SubResource("BoxMesh_o18ao")
 skeleton = NodePath("../..")
@@ -133,7 +155,8 @@ shape = SubResource("BoxShape3D_ksylp")
 
 [node name="Tail_Boom_Section_A" type="RigidBody3D" parent="Tail_Boom"]
 transform = Transform3D(1, 0, 0, 0, 0.0871558, -0.996195, 0, 0.996195, 0.0871558, 0, 0.3, 0)
-mass = 10.0
+contact_monitor = true
+max_contacts_reported = 3
 linear_damp = 0.1
 angular_damp = 0.1
 script = ExtResource("3_irkl7")
@@ -144,14 +167,20 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_A"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_A"]
-node_a = NodePath("../../..")
+[node name="Joint" type="JoltHingeJoint3D" parent="Tail_Boom/Tail_Boom_Section_A"]
+limit_enabled = true
+node_a = NodePath("../../../Fuselage/Body")
 node_b = NodePath("..")
+solver_velocity_iterations = 2
+solver_position_iterations = 2
 transform = Transform3D(1, 1.42109e-14, 0, -1.42109e-14, 1, 0, 0, 0, 1, -5.96047e-08, -2.38419e-07, 1.49012e-08)
 
 [node name="Tail_Boom_Section_B" type="RigidBody3D" parent="Tail_Boom"]
 transform = Transform3D(1, 0, 0, 0, 0.0871558, -0.996195, 0, 0.996195, 0.0871558, 0, 0.387156, 1.09619)
+mass = 0.011
 freeze_mode = 1
+contact_monitor = true
+max_contacts_reported = 3
 script = ExtResource("3_irkl7")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Tail_Boom/Tail_Boom_Section_B"]
@@ -160,14 +189,19 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_B"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_B"]
+[node name="Joint" type="JoltHingeJoint3D" parent="Tail_Boom/Tail_Boom_Section_B"]
+limit_enabled = true
 node_a = NodePath("../../Tail_Boom_Section_A")
 node_b = NodePath("..")
+solver_velocity_iterations = 2
+solver_position_iterations = 2
 
 [node name="Tail_Boom_Section_C" type="RigidBody3D" parent="Tail_Boom"]
 transform = Transform3D(1, 0, 0, 0, 0.0871558, -0.996195, 0, 0.996195, 0.0871558, 0, 0.474312, 2.19239)
-mass = 0.1
+mass = 0.011
 freeze_mode = 1
+contact_monitor = true
+max_contacts_reported = 3
 script = ExtResource("3_irkl7")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Tail_Boom/Tail_Boom_Section_C"]
@@ -176,13 +210,16 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_C"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_C"]
+[node name="Joint" type="JoltHingeJoint3D" parent="Tail_Boom/Tail_Boom_Section_C"]
+limit_enabled = true
 node_a = NodePath("../../Tail_Boom_Section_B")
 node_b = NodePath("..")
+solver_velocity_iterations = 2
+solver_position_iterations = 2
 
 [node name="Tail_Boom_Section_D" type="RigidBody3D" parent="Tail_Boom"]
 transform = Transform3D(1, 0, 0, 0, 0.0871558, -0.996195, 0, 0.996195, 0.0871558, 0, 0.561467, 3.28858)
-mass = 0.1
+mass = 0.001
 can_sleep = false
 freeze_mode = 1
 contact_monitor = true
@@ -195,9 +232,11 @@ mesh = SubResource("CylinderMesh_ccio1")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Tail_Boom/Tail_Boom_Section_D"]
 shape = SubResource("ConvexPolygonShape3D_20max")
 
-[node name="Joint" type="JoltGeneric6DOFJoint3D" parent="Tail_Boom/Tail_Boom_Section_D"]
+[node name="Joint" type="JoltHingeJoint3D" parent="Tail_Boom/Tail_Boom_Section_D"]
+limit_enabled = true
 node_a = NodePath("../../Tail_Boom_Section_C")
 node_b = NodePath("..")
+solver_velocity_iterations = 2
 
 [node name="TailRotor" type="Marker3D" parent="Tail_Boom/Tail_Boom_Section_D"]
 transform = Transform3D(-1, 0, -8.74228e-08, 8.70901e-08, 0.0871557, -0.996194, 7.6194e-09, -0.996194, -0.0871557, -0.0999998, 0.101159, 0.0471089)
@@ -289,6 +328,7 @@ mesh = SubResource("CylinderMesh_38ykb")
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0.6, -0.2, 0)
 mesh = SubResource("CylinderMesh_38ykb")
 
+[connection signal="body_entered" from="Fuselage/Body" to="Fuselage/Body" method="_on_body_entered"]
 [connection signal="body_entered" from="Tail_Boom/Tail_Boom_Section_A" to="Tail_Boom/Tail_Boom_Section_A" method="_on_body_entered"]
 [connection signal="body_entered" from="Tail_Boom/Tail_Boom_Section_B" to="Tail_Boom/Tail_Boom_Section_B" method="_on_body_entered"]
 [connection signal="body_entered" from="Tail_Boom/Tail_Boom_Section_C" to="Tail_Boom/Tail_Boom_Section_C" method="_on_body_entered"]

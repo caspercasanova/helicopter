@@ -1,7 +1,5 @@
 # Helicopter Simulation Development
 
-
-
 Currently, I'm working on replicating the helicopter flight mechanics from the game **Nuclear Option**. This project is a blend of GPT-assisted coding and my journey as a novice game developer, focusing on the nuances of helicopter flight simulation.
 
 ### Current Challenge:
@@ -9,11 +7,13 @@ Currently, I'm working on replicating the helicopter flight mechanics from the g
 #### Flight Model
 Making flight fun, gliding with a bit less input required from the pilot. Currently Everything is very loose. 
 
-#### Aircraft Modules
+#### Destructible Aircraft Modules
 I am currently testing out how to make different sections of the aircraft 'destructible'. My intuition is guiding me towards making each section of Helicopter a `RigidBody` and using `Jolt Joints` to tie everything together would be the best approach.
 I want to avoid needing to have to make different Area3D's to register different damages. 
 Current implementation works as far as I know, **however**, the tail section gets springy with more than a couple joints applied. 
 I worked around this solution by changing the mass on the individual rigid bodies, but I feel like that is a work around, from what seems like an obvious fix with better Joint Params. 
+
+One thing to explore would be some kind of Skeletal Bone System. Might be worth it, but who knows.  
 
 ---
 

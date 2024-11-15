@@ -55,3 +55,8 @@ grow_horizontal = 0
 
 [node name="sky_hook" type="Label" parent="RightBox"]
 layout_mode = 2
+text = "sky hook"
+
+[node name="hover_mode" type="Label" parent="RightBox"]
+layout_mode = 2
+text = "hover mode"

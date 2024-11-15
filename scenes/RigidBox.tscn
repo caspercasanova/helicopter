@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://cym4y2mt8yvyy"]
 
-[ext_resource type="Script" path="res://scenes/HeavyItem.gd" id="1_a4yea"]
+[ext_resource type="PackedScene" uid="uid://yi0r5myhchbl" path="res://scenes/Latch_Point.tscn" id="1_eujg6"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_b6lnf"]
 
@@ -11,9 +11,10 @@ albedo_color = Color(0, 0, 0, 1)
 material = SubResource("StandardMaterial3D_0ssxf")
 
 [node name="RigidBody3D" type="RigidBody3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 59, 31, -35)
 mass = 100.0
-script = ExtResource("1_a4yea")
+
+[node name="Latch_Point" parent="." instance=ExtResource("1_eujg6")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("BoxShape3D_b6lnf")

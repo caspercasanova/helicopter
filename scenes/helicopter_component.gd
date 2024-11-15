@@ -2,9 +2,9 @@ extends RigidBody3D
 
 
 
-const DAMAGE_SPEED_THRESHOLD = 0.5
+const DAMAGE_SPEED_THRESHOLD = 0.01
 @export var health: int = 100
-@onready var joint: JoltGeneric6DOFJoint3D = $Joint
+@onready var joint: JoltHingeJoint3D = $Joint
 
 
 
