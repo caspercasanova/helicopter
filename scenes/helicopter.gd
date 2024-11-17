@@ -56,6 +56,10 @@ TODO: Rigid body AI Implementation?
 TODO: Clean + Polished UI
 TODO: Make shareable DEMO
 
+
+TODO:
+	Reactive Destruction
+
 """
 # TODO: Change this to a helicopter state variable
 # Loading, Landing, Repairing, Injured, Green Light
@@ -87,7 +91,7 @@ var rope_instance: JoltPinJoint3D
 
 ### Debug and state flags
 var debug: bool = false
-var loaded = false
+
 
 
 ### --- Constants ---
@@ -98,10 +102,12 @@ var GRAVITY = ProjectSettings.get_setting("physics/3d/default_gravity")
 const PITCH_FORCE_COEFFICIENT: float = 100000.0
 const ROLL_FORCE_COEFFICIENT: float = 30000.0
 
+var weight: float
 
 
 ### State Variables
-var weight: float
+var is_landed = false
+var is_on_helipad = false
 var move: Vector3 = Vector3.ZERO
 var sky_hook_deployed: bool = false
 var hover_mode: bool = false
@@ -256,13 +262,12 @@ var ground_effect_multiplier: float:
 
 
 
-
-
 func _ready():
 	weight = weight_in_lbs * LBS_TO_KG
 	self.mass = weight
 	cursor_pointer.top_level = true
-	loaded = true
+	apply_modules_to_ship()
+
 
 
 
@@ -313,8 +318,6 @@ func _process(delta):
 
 
 func _physics_process(delta: float) -> void:
-	if !loaded:
-		return
 	
 	if is_engine_spooling_up: 
 		engine_spool_up(delta)
@@ -631,8 +634,209 @@ func toggle_hover_mode():
 
 
 
+
+#region Loadout
+### Vehicle Components & Weapon Systems
+"""
+Loadouts
+toggle right / left weapons subsystem
+(mid slot, small slot)
+Set Small Slot 
+- Gun A
+- Gun A x2
+- Gun B
+Set Medium Slot
+- Rocket Pod A
+- Rocket Pod B
+"""
+@export var vehicle_components: Array[Vehicle_Component]
+@export var left_weapon_subsystem_point: Node3D
+@export var right_weapon_subsystem_point: Node3D
+
+const LEFT_WEAPON_SUBSYSTEM = preload("res://scenes/weapons/left_weapon_subsystem.tscn")
+const RIGHT_WEAPON_SUBSYSTEM = preload("res://scenes/weapons/right_weapon_subsystem.tscn")
+
+const GUN_A = preload("res://scenes/weapons/gun_a.tscn")
+const GUN_B = preload("res://scenes/weapons/gun_b.tscn")
+const GUN_C = preload("res://scenes/weapons/gun_c.tscn")
+
+enum SMALL_WEAPONS_MODULE_NAMES {
+	GUN_A,
+	GUN_B,
+	GUN_C,
+}
+
+var small_weapons_modules = {
+	SMALL_WEAPONS_MODULE_NAMES.GUN_A: GUN_A,
+	SMALL_WEAPONS_MODULE_NAMES.GUN_B: GUN_B,
+	SMALL_WEAPONS_MODULE_NAMES.GUN_C: GUN_C,
+}
+
+const ROCKET_POD_A = preload("res://scenes/weapons/rocket_pod_a.tscn")
+const ROCKET_POD_B = preload("res://scenes/weapons/rocket_pod_b.tscn")
+
+enum MEDIUM_WEAPONS_MODULE_NAMES {
+	ROCKET_POD_A,
+	ROCKET_POD_B
+}
+
+var medium_weapons_modules = {
+	MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_A: ROCKET_POD_A,
+	MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_B: ROCKET_POD_B
+}
+
+
+
+
+
+
+## Adds the Left weapon system to the helicopter
+@export var has_left_subsystem: bool = false
+var left_weapon_subsystem: Helicopter_Weapon_Subsystem
+## Adds the Right weapon system to the helicopter
+@export var has_right_subsystem: bool = false
+var right_weapon_subsystem: Helicopter_Weapon_Subsystem
+func add_weapon_subsystem_to_helo(subsystem: String):
+	assert(subsystem == "left" or subsystem == "right")
+	if subsystem == "left":
+		var node = LEFT_WEAPON_SUBSYSTEM.instantiate()
+		left_weapon_subsystem_point.add_child(node)
+		node.joint.node_a = self.get_path()
+		left_weapon_subsystem = node
+		print("thing", node.joint)
+	else:
+		var node = RIGHT_WEAPON_SUBSYSTEM.instantiate()
+		right_weapon_subsystem_point.add_child(node)
+		node.joint.node_a = self.get_path()
+		right_weapon_subsystem = node
+		print("thing", node.joint)
+
+func remove_subsystem_from_helo(subsystem: String):
+	assert(subsystem == "left" or subsystem == "right")
+	if subsystem == "left":
+		for nodes in left_weapon_subsystem_point.get_children():
+			nodes.queue_free()
+
+	else:
+		for nodes in right_weapon_subsystem_point.get_children():
+			nodes.queue_free()
+
+
+func add_subsystem_small_slot(side: String, item: SMALL_WEAPONS_MODULE_NAMES):
+	if side == "left":
+		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
+		for nodes in left_weapon_subsystem.small_slot_a.get_children():
+			nodes.queue_free()
+		var node = small_weapons_modules[item].instantiate()
+		left_weapon_subsystem.small_slot_a.add_child(node) 
+	elif side == "right":
+		assert(has_right_subsystem, "Need to have a left subsystem to add weapon")
+		for nodes in right_weapon_subsystem.small_slot_a.get_children():
+			nodes.queue_free()
+		var node = small_weapons_modules[item].instantiate()
+		right_weapon_subsystem.small_slot_a.add_child(node) 
+	return
+
+func add_subsystem_medium_slot(side: String, item: MEDIUM_WEAPONS_MODULE_NAMES):
+	if side == "left":
+		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
+		for nodes in left_weapon_subsystem.medium_slot_a.get_children():
+			nodes.queue_free()
+		var node = medium_weapons_modules[item].instantiate()
+		left_weapon_subsystem.medium_slot_a.add_child(node)
+		
+	elif side == "right":
+		assert(has_right_subsystem, "Need to have a left subsystem to add weapon")
+		for nodes in right_weapon_subsystem.medium_slot_a.get_children():
+			nodes.queue_free()
+		var node = medium_weapons_modules[item].instantiate()
+		right_weapon_subsystem.medium_slot_a.add_child(node) 
+	return
+
+
+
+func apply_modules_to_ship():
+	"""
+	Either here or somewhere be able to allow a single function that makes a helicopter with everything applied
+	"""
+	if has_left_subsystem:
+		add_weapon_subsystem_to_helo("left")
+		add_subsystem_small_slot("left", SMALL_WEAPONS_MODULE_NAMES.GUN_A)
+		add_subsystem_medium_slot("left", MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_B)
+	
+	if has_right_subsystem:
+		add_weapon_subsystem_to_helo("right")
+		add_subsystem_small_slot("right", SMALL_WEAPONS_MODULE_NAMES.GUN_C)
+		add_subsystem_medium_slot("right", MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_A)
+		
+
+
+#endregion
+
+
  
 #region Damage & Impact Forces
+"""
+TODO: Need to hold health / status of each component 
+TODO: Apply Tail Rotor Health
+TODO: Health Bars above each component 
+
+"""
+const DAMAGE_SPEED_THRESHOLD = 100
+@export var health: int = 100
+
+
+
+
+
+
+
+
+func _on_body_entered(body: Node) -> void:
+	print('Collision detected with body:', body)
+
+	# Check if the body has a linear_velocity (indicating it's a PhysicsBody3D)
+	if body.has_method("linear_velocity"):
+		var relative_speed = (body.linear_velocity - linear_velocity).length()
+
+		# Calculate and inflict damage if relative speed exceeds threshold
+		if relative_speed > DAMAGE_SPEED_THRESHOLD:
+			inflict_damage(relative_speed)
+			print('Destroying joint due to high-speed impact.')
+			
+			for node in vehicle_components:
+				if node.joint:
+					node.joint.queue_free()
+					node.joint=null
+	else:
+		# For bodies without linear_velocity (e.g., StaticBody3D or other nodes), use impact velocity and mass
+		print('Taking damage from collision with static or unmovable body.')
+
+		# Calculate the collision normal
+		var collision_normal = (global_transform.origin - body.global_transform.origin).normalized()
+
+		# Calculate the component of velocity in the direction of the collision normal
+		var impact_velocity = linear_velocity.dot(collision_normal)
+		impact_velocity = abs(impact_velocity)  # Ensure positive impact velocity
+		
+		# Compute the impact force
+		var impact_force = mass * impact_velocity
+
+		# Inflict damage if impact force exceeds threshold
+		if impact_force > DAMAGE_SPEED_THRESHOLD:
+			inflict_damage(impact_force)
+			
+			for node in vehicle_components:
+				if node.joint:
+					node.joint.queue_free()
+					node.joint=null
+
+	pass
+
+
+func inflict_damage(impact_force: float) -> void:
+	# Custom logic to apply damage based on impact force
+	print("Damage inflicted with force:", impact_force)
 
 
 @onready var prop_1: Area3D = $MainRotorShaft/MainRotorShaftMesh/Prop1
@@ -676,8 +880,5 @@ func apply_damage_to_props(_body: Node3D, prop: Area3D) -> void:
 		# If the impact force exceeds the destroy threshold, destroy the propeller
 		if impact_force > prop_destroy_threshold:
 			prop.queue_free()
-	
-
-
 
 #endregion

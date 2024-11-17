@@ -1,4 +1,4 @@
-extends RigidBody3D
+class_name Vehicle_Component extends RigidBody3D
 
 
 
@@ -42,8 +42,6 @@ func _on_body_entered(body: Node) -> void:
 			if joint:
 				joint.queue_free()
 				joint=null
-
-	pass
 
 
 func inflict_damage(impact_force: float) -> void:

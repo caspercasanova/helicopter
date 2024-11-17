@@ -12,15 +12,19 @@ func _on_area_3d_body_entered(body: Node3D) -> void:
 	
 	if body is Helicopter:
 		helicopter_is_on_pad = true
+		body.is_on_helipad = true
 		print("Helicopter is on pad")
-	pass # Replace with function body.
 
 
 
 
 func _on_area_3d_body_exited(body: Node3D) -> void:
-	helicopter_is_on_pad = false
-	pass # Replace with function body.
+	
+	if body is Helicopter:
+		helicopter_is_on_pad = false
+		body.is_on_helipad = false
+		print("Helicopter has left the pad")
+
 
 
 

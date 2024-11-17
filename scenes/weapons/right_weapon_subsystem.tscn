@@ -1,0 +1,44 @@
+[gd_scene load_steps=5 format=3 uid="uid://cv0o027fvpp8g"]
+
+[ext_resource type="Script" path="res://scenes/weapons/helicopter_weapon_subsystem.gd" id="1_2fig1"]
+[ext_resource type="Script" path="res://scenes/helicopter_component.gd" id="1_og026"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_gtkvq"]
+size = Vector3(0.8, 0.2, 0.2)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_b8coe"]
+points = PackedVector3Array(0.4, 0.1, 0.1, 0.4, 0.1, -0.1, -0.4, 0.1, 0.1, 0.4, -0.1, 0.1, 0.4, -0.1, -0.1, -0.4, 0.1, -0.1, -0.4, -0.1, 0.1, -0.4, -0.1, -0.1)
+
+[node name="Right Weapon Subsystem" type="Node3D" node_paths=PackedStringArray("joint", "medium_slot_a", "small_slot_a")]
+script = ExtResource("1_2fig1")
+joint = NodePath("Right Weapon Subsystem Rigid/Joint")
+medium_slot_a = NodePath("Right Weapon Subsystem Rigid/Med Slot A")
+small_slot_a = NodePath("Right Weapon Subsystem Rigid/Small Slot A")
+
+[node name="Right Weapon Subsystem Rigid" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0112449, 0, 0)
+contact_monitor = true
+max_contacts_reported = 3
+script = ExtResource("1_og026")
+
+[node name="Right Weapon Subsystem Mesh" type="MeshInstance3D" parent="Right Weapon Subsystem Rigid"]
+mesh = SubResource("BoxMesh_gtkvq")
+skeleton = NodePath("../..")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Right Weapon Subsystem Rigid"]
+shape = SubResource("ConvexPolygonShape3D_b8coe")
+
+[node name="Joint" type="JoltHingeJoint3D" parent="Right Weapon Subsystem Rigid"]
+limit_enabled = true
+node_b = NodePath("..")
+solver_velocity_iterations = 2
+solver_position_iterations = 2
+transform = Transform3D(1, 1.42109e-14, 0, -1.42109e-14, 1, 0, 0, 0, 1, -5.96047e-08, -2.38419e-07, 1.49012e-08)
+
+[node name="Med Slot A" type="Node3D" parent="Right Weapon Subsystem Rigid"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0488485, -0.123369, 0)
+
+[node name="Small Slot A" type="Node3D" parent="Right Weapon Subsystem Rigid"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.421259, -0.0954499, 0)
+
+[connection signal="body_entered" from="Right Weapon Subsystem Rigid" to="Right Weapon Subsystem Rigid" method="_on_body_entered"]

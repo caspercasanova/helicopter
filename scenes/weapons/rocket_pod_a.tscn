@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://phqe2hx4f036"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ygwyl"]
+albedo_color = Color(0.458824, 0, 0.737255, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ow5i3"]
+material = SubResource("StandardMaterial3D_ygwyl")
+size = Vector3(0.2, 0.2, 0.5)
+
+[node name="RocketPodA" type="Node3D"]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_ow5i3")
