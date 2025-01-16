@@ -1,4 +1,6 @@
-class_name Helicopter extends RigidBody3D
+#@tool
+extends RigidBody3D
+class_name Helicopter 
 ## An attempt at making a fun physics based helicopter 
 ## 
 ## Still plenty to do, Note that flight is currently super unstable 
@@ -27,6 +29,7 @@ TODO: Understand and implement retreating blade stall
 TODO: Refactor to an engine Engine Curve?
 TODO: Ground Effect?
 TODO: Autorotation?
+TODO: VRS?
 TODO: Cleaner version of prop damage -> Component Damage "System"
 TODO: Maybe split the lift vector by the prop count and apply every revolution? (maybe not idk) "Force-Per-Prop" Lite™ Implementation
 TODO: Aerodynamics
@@ -39,14 +42,16 @@ TODO: Overall flight feels lame still and hard
 
 TODO: Solve Joint Bouncyness
 
-
-TODO: Cohesive Helicopter Module / Health System 
+TODO: Cohesive & Refined Helicopter Module / Health System 
 
 TODO: Variables Needed. 
 	- AoA 
 	- Sea Level Altitude
 
 TODO: Clean the rest of these variables, refactor and reorganize 
+
+TODO: Weapon Crosshairs / Mouse Flight ? (Prob Not)
+https://github.com/brihernandez/MouseFlight
 
 ---
 Dream TODOs:
@@ -155,9 +160,6 @@ var roll_angle: float:
 		var forward_vector = global_transform.basis.z 
 		var world_up = Vector3.UP
 		
-		# Project the up vector onto the horizontal plane defined by the world up vector
-		var up_projected = (up_vector - up_vector.dot(world_up) * world_up).normalized()
-		
 		# Calculate the roll angle as the angle between the up vector and its projection
 		var cos_roll = up_vector.dot(world_up)
 		cos_roll = clamp(cos_roll, -1.0, 1.0)  # Ensure acos is within valid range
@@ -232,7 +234,6 @@ var tip_velocity: float:
 
 ### Lift Forces
 @export var total_drag_curve: Curve
-
 @export var max_lift_coefficient: float = 1.5  # Maximum lift at full collective pitch
 
 var main_rotor_lift_force: float = 0.0
@@ -261,15 +262,25 @@ var ground_effect_multiplier: float:
 
 
 
+### UI
+@onready var loadout_menu: CanvasLayer = $LoadoutMenu
+@onready var helicopter_ui: CanvasLayer = $HelicopterUi
+enum ENUM_HELICOPTER_HUDS {
+	LOADOUT_MENU,
+	HELICOPTER_HUD
+}
+var current_helicopter_hud: ENUM_HELICOPTER_HUDS = ENUM_HELICOPTER_HUDS.LOADOUT_MENU
+
+
+
+
 
 func _ready():
 	weight = weight_in_lbs * LBS_TO_KG
 	self.mass = weight
 	cursor_pointer.top_level = true
 	apply_modules_to_ship()
-
-
-
+	
 
 func _unhandled_input(event):
 	if event is InputEventKey:
@@ -281,8 +292,15 @@ func _input(_event: InputEvent):
 		toggle_sky_hook()
 	if Input.is_action_pressed("C"):
 		toggle_hover_mode()
-
-
+	if Input.is_action_pressed("T"):
+		if current_helicopter_hud == ENUM_HELICOPTER_HUDS.LOADOUT_MENU:
+			current_helicopter_hud = ENUM_HELICOPTER_HUDS.HELICOPTER_HUD
+			helicopter_ui.visible = true
+			loadout_menu.visible = false
+		else:
+			current_helicopter_hud = ENUM_HELICOPTER_HUDS.LOADOUT_MENU
+			loadout_menu.visible = true
+			helicopter_ui.visible = false
 
 
 func _process(delta):
@@ -307,11 +325,8 @@ func _process(delta):
 		else: 
 			engine_shut_off_timer = 0
 
-		
 	collective_pitch = clamp(collective_pitch, 0.0, 1.0)
 	
-
-
 	move.x = Input.get_action_strength("D") - Input.get_action_strength("A")
 	move.y = Input.get_action_strength("W") - Input.get_action_strength("S")
 	move.z = Input.get_action_strength("E") - Input.get_action_strength("Q")
@@ -649,7 +664,8 @@ Set Medium Slot
 - Rocket Pod A
 - Rocket Pod B
 """
-@export var vehicle_components: Array[Vehicle_Component]
+@export_group("Vehicle Loadout")
+@export var vehicle_components: Array[Helicopter_Component]
 @export var left_weapon_subsystem_point: Node3D
 @export var right_weapon_subsystem_point: Node3D
 
@@ -661,6 +677,7 @@ const GUN_B = preload("res://scenes/weapons/gun_b.tscn")
 const GUN_C = preload("res://scenes/weapons/gun_c.tscn")
 
 enum SMALL_WEAPONS_MODULE_NAMES {
+	NONE,
 	GUN_A,
 	GUN_B,
 	GUN_C,
@@ -676,6 +693,7 @@ const ROCKET_POD_A = preload("res://scenes/weapons/rocket_pod_a.tscn")
 const ROCKET_POD_B = preload("res://scenes/weapons/rocket_pod_b.tscn")
 
 enum MEDIUM_WEAPONS_MODULE_NAMES {
+	NONE,
 	ROCKET_POD_A,
 	ROCKET_POD_B
 }
@@ -688,67 +706,94 @@ var medium_weapons_modules = {
 
 
 
-
-
 ## Adds the Left weapon system to the helicopter
-@export var has_left_subsystem: bool = false
+@export var has_left_subsystem: bool = false:
+	set(val):
+		has_left_subsystem = val
+		notify_property_list_changed()
 var left_weapon_subsystem: Helicopter_Weapon_Subsystem
+
 ## Adds the Right weapon system to the helicopter
-@export var has_right_subsystem: bool = false
+@export var has_right_subsystem: bool = false:
+	set(val):
+		has_right_subsystem = val
+		notify_property_list_changed()
 var right_weapon_subsystem: Helicopter_Weapon_Subsystem
-func add_weapon_subsystem_to_helo(subsystem: String):
-	assert(subsystem == "left" or subsystem == "right")
-	if subsystem == "left":
+
+
+@export var left_weapon_system_small_slot_a: SMALL_WEAPONS_MODULE_NAMES = SMALL_WEAPONS_MODULE_NAMES.NONE
+@export var left_weapon_system_medium_slot_b: MEDIUM_WEAPONS_MODULE_NAMES = MEDIUM_WEAPONS_MODULE_NAMES.NONE
+@export var right_weapon_system_small_slot_a: SMALL_WEAPONS_MODULE_NAMES = SMALL_WEAPONS_MODULE_NAMES.NONE
+@export var right_weapon_system_medium_slot_b: MEDIUM_WEAPONS_MODULE_NAMES = MEDIUM_WEAPONS_MODULE_NAMES.NONE
+
+
+
+func add_weapon_subsystem_to_helo(subsystem_side: Helicopter_Weapon_Subsystem.SIDE):
+	if subsystem_side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		var node = LEFT_WEAPON_SUBSYSTEM.instantiate()
 		left_weapon_subsystem_point.add_child(node)
 		node.joint.node_a = self.get_path()
 		left_weapon_subsystem = node
-		print("thing", node.joint)
+		print("add_weapon_subsystem_to_helo", node.joint)
 	else:
 		var node = RIGHT_WEAPON_SUBSYSTEM.instantiate()
 		right_weapon_subsystem_point.add_child(node)
 		node.joint.node_a = self.get_path()
 		right_weapon_subsystem = node
-		print("thing", node.joint)
+		print("add_weapon_subsystem_to_helo", node.joint)
 
-func remove_subsystem_from_helo(subsystem: String):
-	assert(subsystem == "left" or subsystem == "right")
-	if subsystem == "left":
+func remove_subsystem_from_helo(subsystem_side: Helicopter_Weapon_Subsystem.SIDE):
+	if subsystem_side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		for nodes in left_weapon_subsystem_point.get_children():
 			nodes.queue_free()
-
 	else:
 		for nodes in right_weapon_subsystem_point.get_children():
 			nodes.queue_free()
 
 
-func add_subsystem_small_slot(side: String, item: SMALL_WEAPONS_MODULE_NAMES):
-	if side == "left":
+func add_subsystem_small_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: SMALL_WEAPONS_MODULE_NAMES):
+	if side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
 		for nodes in left_weapon_subsystem.small_slot_a.get_children():
 			nodes.queue_free()
+		
+		if item == SMALL_WEAPONS_MODULE_NAMES.NONE:
+			return
+		
 		var node = small_weapons_modules[item].instantiate()
 		left_weapon_subsystem.small_slot_a.add_child(node) 
-	elif side == "right":
+	elif side == Helicopter_Weapon_Subsystem.SIDE.RIGHT:
 		assert(has_right_subsystem, "Need to have a left subsystem to add weapon")
 		for nodes in right_weapon_subsystem.small_slot_a.get_children():
 			nodes.queue_free()
+		
+		if item == SMALL_WEAPONS_MODULE_NAMES.NONE:
+			return
+		
 		var node = small_weapons_modules[item].instantiate()
 		right_weapon_subsystem.small_slot_a.add_child(node) 
 	return
 
-func add_subsystem_medium_slot(side: String, item: MEDIUM_WEAPONS_MODULE_NAMES):
-	if side == "left":
+func add_subsystem_medium_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: MEDIUM_WEAPONS_MODULE_NAMES):
+	if side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
 		for nodes in left_weapon_subsystem.medium_slot_a.get_children():
 			nodes.queue_free()
+		
+		if item == MEDIUM_WEAPONS_MODULE_NAMES.NONE:
+			return
+		
 		var node = medium_weapons_modules[item].instantiate()
 		left_weapon_subsystem.medium_slot_a.add_child(node)
 		
-	elif side == "right":
+	elif side == Helicopter_Weapon_Subsystem.SIDE.RIGHT:
 		assert(has_right_subsystem, "Need to have a left subsystem to add weapon")
 		for nodes in right_weapon_subsystem.medium_slot_a.get_children():
 			nodes.queue_free()
+		
+		if item == MEDIUM_WEAPONS_MODULE_NAMES.NONE:
+			return
+		
 		var node = medium_weapons_modules[item].instantiate()
 		right_weapon_subsystem.medium_slot_a.add_child(node) 
 	return
@@ -760,15 +805,64 @@ func apply_modules_to_ship():
 	Either here or somewhere be able to allow a single function that makes a helicopter with everything applied
 	"""
 	if has_left_subsystem:
-		add_weapon_subsystem_to_helo("left")
-		add_subsystem_small_slot("left", SMALL_WEAPONS_MODULE_NAMES.GUN_A)
-		add_subsystem_medium_slot("left", MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_B)
+		add_weapon_subsystem_to_helo(Helicopter_Weapon_Subsystem.SIDE.LEFT)
+		add_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_small_slot_a)
+		add_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_medium_slot_b)
 	
 	if has_right_subsystem:
-		add_weapon_subsystem_to_helo("right")
-		add_subsystem_small_slot("right", SMALL_WEAPONS_MODULE_NAMES.GUN_C)
-		add_subsystem_medium_slot("right", MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_A)
+		add_weapon_subsystem_to_helo(Helicopter_Weapon_Subsystem.SIDE.RIGHT)
+		add_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_small_slot_a)
+		add_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_medium_slot_b)
 		
+
+### return to this when I need to turn into a tool, but not for now
+#func _get_property_list():
+	#var property_usage = PROPERTY_USAGE_NO_EDITOR
+	#
+	#if Engine.is_editor_hint():
+		#var properties: Array[Dictionary] = []
+		#
+	## Conditionally show the texture property
+		#if (has_left_subsystem):
+			#properties.append({
+				#"name": "Left Weapon System Small Slot A",
+				#"type": TYPE_INT,   
+				#"hint": PROPERTY_HINT_ENUM,
+				#"hint_string": "NONE,GUN_A,GUN_B,GUN_C",
+			#})
+		#return properties
+#
+## The value argument must be a variant, which we can't explicitly tell through static typing.
+## This function must return true if the property actually exists.
+#func _set(prop_name: StringName, val) -> bool:
+	## Assume the property exists
+	#var return_value: bool = true
+	#
+	#match prop_name:
+		#"Left Weapon System Small Slot A":
+			#left_weapon_system_small_slot_a = val
+		#
+		#"Right Weapon System Small Slot A":
+			#right_weapon_system_small_slot_a = val
+		#
+		#_:
+			## If here, trying to set a property we are not manually dealing with.
+			#return_value = false
+	#
+	#return return_value
+#
+## This function must return a value, which is basically the one related to the property name.
+## However it is a variant, which we can't define explicitly through static typing.
+#func _get(prop_name: StringName):
+	#match prop_name:
+		#"Left Weapon System Small Slot A":
+			#return left_weapon_system_small_slot_a
+		#
+		#"Right Weapon System Small Slot A":
+			#return right_weapon_system_small_slot_a
+	#
+	#return null
+
 
 
 #endregion
@@ -782,6 +876,8 @@ TODO: Apply Tail Rotor Health
 TODO: Health Bars above each component 
 
 """
+
+@export_group("Damage & Impact Forces")
 const DAMAGE_SPEED_THRESHOLD = 100
 @export var health: int = 100
 
@@ -831,7 +927,7 @@ func _on_body_entered(body: Node) -> void:
 					node.joint.queue_free()
 					node.joint=null
 
-	pass
+
 
 
 func inflict_damage(impact_force: float) -> void:
@@ -850,9 +946,6 @@ func inflict_damage(impact_force: float) -> void:
 var prop_damage_threshold: float = 10.0  # Minimum impact force to cause damage
 var prop_destroy_threshold: float = 50.0  # Impact force needed to destroy the prop
 
-
-# Track impact forces for each collision area
-var impact_forces = {}
 
 
 
@@ -880,5 +973,11 @@ func apply_damage_to_props(_body: Node3D, prop: Area3D) -> void:
 		# If the impact force exceeds the destroy threshold, destroy the propeller
 		if impact_force > prop_destroy_threshold:
 			prop.queue_free()
+
+func react_to_damage():
+	# prop damage reduces prop output
+	# engine power is has a engine health coefficient
+	pass
+
 
 #endregion

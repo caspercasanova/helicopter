@@ -1,7 +1,8 @@
-[gd_scene load_steps=31 format=3 uid="uid://di1np6mf845jg"]
+[gd_scene load_steps=32 format=3 uid="uid://di1np6mf845jg"]
 
 [ext_resource type="Script" path="res://scenes/helicopter.gd" id="1_7xf6l"]
 [ext_resource type="Script" path="res://scenes/camera_base.gd" id="2_4wjwm"]
+[ext_resource type="PackedScene" uid="uid://b4k4c3jm86x3l" path="res://scenes/loadout_menu.tscn" id="2_ugrlq"]
 [ext_resource type="PackedScene" uid="uid://dscu7s2k73eyy" path="res://scenes/helicopter_ui.tscn" id="2_y1icg"]
 [ext_resource type="Script" path="res://scenes/helicopter_component.gd" id="3_irkl7"]
 
@@ -109,6 +110,8 @@ left_weapon_subsystem_point = NodePath("Fuselage/Left Weapon Subsystem Point")
 right_weapon_subsystem_point = NodePath("Fuselage/Right Weapon Subsystem Point")
 has_left_subsystem = true
 has_right_subsystem = true
+
+[node name="LoadoutMenu" parent="." instance=ExtResource("2_ugrlq")]
 
 [node name="HelicopterUi" parent="." instance=ExtResource("2_y1icg")]
 
@@ -289,7 +292,8 @@ transform = Transform3D(1, 5.68434e-14, -1.77636e-15, 0, 1, -4.47035e-08, -8.881
 mesh = SubResource("BoxMesh_518yp")
 
 [node name="CursorPointer" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2)
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -1.74846e-07, 0, 0)
+top_level = true
 mesh = SubResource("SphereMesh_7qf8f")
 
 [node name="Camera_Base" type="Node3D" parent="." node_paths=PackedStringArray("helicopter", "CAMERA_CONTROLLER")]

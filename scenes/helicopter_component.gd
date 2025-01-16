@@ -1,4 +1,4 @@
-class_name Vehicle_Component extends RigidBody3D
+class_name Helicopter_Component extends RigidBody3D
 
 
 

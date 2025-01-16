@@ -27,10 +27,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
-	#if HUMVEE.player_node:
-		#CAMERA_CONTROLLER.make_current()
-	#else:
-		#return
+
 	_update_camera(delta)
 	_cast_ray_from_camera()
 	pass

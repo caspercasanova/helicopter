@@ -11,6 +11,7 @@ points = PackedVector3Array(0.4, 0.1, 0.1, 0.4, 0.1, -0.1, -0.4, 0.1, 0.1, 0.4, 
 
 [node name="Right Weapon Subsystem" type="Node3D" node_paths=PackedStringArray("joint", "medium_slot_a", "small_slot_a")]
 script = ExtResource("1_2fig1")
+side = 1
 joint = NodePath("Right Weapon Subsystem Rigid/Joint")
 medium_slot_a = NodePath("Right Weapon Subsystem Rigid/Med Slot A")
 small_slot_a = NodePath("Right Weapon Subsystem Rigid/Small Slot A")
