@@ -1,9 +1,10 @@
-[gd_scene load_steps=32 format=3 uid="uid://di1np6mf845jg"]
+[gd_scene load_steps=33 format=3 uid="uid://di1np6mf845jg"]
 
 [ext_resource type="Script" path="res://scenes/helicopter.gd" id="1_7xf6l"]
 [ext_resource type="Script" path="res://scenes/camera_base.gd" id="2_4wjwm"]
-[ext_resource type="PackedScene" uid="uid://b4k4c3jm86x3l" path="res://scenes/loadout_menu.tscn" id="2_ugrlq"]
+[ext_resource type="Script" path="res://scenes/ui_controller.gd" id="2_cc8by"]
 [ext_resource type="PackedScene" uid="uid://dscu7s2k73eyy" path="res://scenes/helicopter_ui.tscn" id="2_y1icg"]
+[ext_resource type="PackedScene" uid="uid://b4k4c3jm86x3l" path="res://scenes/loadout_gui.tscn" id="3_4suff"]
 [ext_resource type="Script" path="res://scenes/helicopter_component.gd" id="3_irkl7"]
 
 [sub_resource type="Curve" id="Curve_yvbh8"]
@@ -97,12 +98,13 @@ size = Vector3(1, 0.5, 2)
 top_radius = 0.1
 bottom_radius = 0.1
 
-[node name="Helicopter" type="RigidBody3D" node_paths=PackedStringArray("tail_rotor_marker", "tail_rotor_mesh", "left_weapon_subsystem_point", "right_weapon_subsystem_point")]
+[node name="Helicopter" type="RigidBody3D" node_paths=PackedStringArray("helicopter_camera_base", "tail_rotor_marker", "tail_rotor_mesh", "left_weapon_subsystem_point", "right_weapon_subsystem_point")]
 transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0, -2)
 contact_monitor = true
 max_contacts_reported = 4
 angular_damp = 0.1
 script = ExtResource("1_7xf6l")
+helicopter_camera_base = NodePath("Cameras")
 tail_rotor_marker = NodePath("Tail_Boom/Tail_Boom_Section_D/TailRotor")
 tail_rotor_mesh = NodePath("Tail_Boom/Tail_Boom_Section_D/TailRotor/TailRotorMesh")
 total_drag_curve = SubResource("Curve_yvbh8")
@@ -111,9 +113,14 @@ right_weapon_subsystem_point = NodePath("Fuselage/Right Weapon Subsystem Point")
 has_left_subsystem = true
 has_right_subsystem = true
 
-[node name="LoadoutMenu" parent="." instance=ExtResource("2_ugrlq")]
+[node name="UI_Controller" type="Node3D" parent="."]
+script = ExtResource("2_cc8by")
 
-[node name="HelicopterUi" parent="." instance=ExtResource("2_y1icg")]
+[node name="HelicopterHUD" parent="UI_Controller" instance=ExtResource("2_y1icg")]
+
+[node name="LoadoutGUI" parent="UI_Controller" node_paths=PackedStringArray("helicopter") instance=ExtResource("3_4suff")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0.0507117, 1.48635, -4.3838)
+helicopter = NodePath("../..")
 
 [node name="Body" type="MeshInstance3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -9.29681e-08, 0, -2.12686)
@@ -296,14 +303,21 @@ transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -1.748
 top_level = true
 mesh = SubResource("SphereMesh_7qf8f")
 
-[node name="Camera_Base" type="Node3D" parent="." node_paths=PackedStringArray("helicopter", "CAMERA_CONTROLLER")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.6, -1.2)
+[node name="Cameras" type="Node3D" parent="." node_paths=PackedStringArray("helicopter", "FLIGHT_CAMERA_CONTROLLER", "LOADOUT_CAMERA_1")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0.0507117, 1.48635, -4.3838)
 script = ExtResource("2_4wjwm")
 helicopter = NodePath("..")
-CAMERA_CONTROLLER = NodePath("Camera3D")
+FLIGHT_CAMERA_CONTROLLER = NodePath("Flight_Camera_Base/FlightCamera")
+LOADOUT_CAMERA_1 = NodePath("LoadoutCamera1")
 
-[node name="Camera3D" type="Camera3D" parent="Camera_Base"]
+[node name="Flight_Camera_Base" type="Node3D" parent="Cameras"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0.0507114, -2.08635, -3.1838)
+
+[node name="FlightCamera" type="Camera3D" parent="Cameras/Flight_Camera_Base"]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 3, 6)
+
+[node name="LoadoutCamera1" type="Camera3D" parent="Cameras"]
+transform = Transform3D(1, 0, 1.74846e-07, 0, 1, 0, -1.74846e-07, 0, 1, 0.0507128, -1.20362, 4.57934)
 
 [node name="EngineLight" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.7)

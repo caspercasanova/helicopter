@@ -10,60 +10,71 @@ class_name Helicopter
 ## @experimental
 
 """
-Num of TODO's as of 11/5/2024: 25-35-ish
-
-
-Add some kind of vortex condition where if the current velocity is opposite of he updaward velocity, then reduce upward coefficient 
-
-TODO: Proper Conditions where rotor speed falls and increases (currently we hardcode based on whether we increase collective to above 80%)
-TODO: [x] Engine Spool Down / Turn Off 
-	- Double check math
-	- Can probably reduce the number of variables there are too many currently
-TODO: We need to somehow apply a damping Anti Torque from the tail rotor, or some kind of auto leveling force so hitting "Q/E" doesn't send u spinning
-TODO: Translational Lift / Movement
-	- Adding a dead zone is probably the right move
-
-TODO: Understand and implement induced drag? 
-TODO: Understand and implement vortex ring state
-TODO: Understand and implement retreating blade stall
-TODO: Refactor to an engine Engine Curve?
-TODO: Ground Effect?
-TODO: Autorotation?
-TODO: VRS?
-TODO: Cleaner version of prop damage -> Component Damage "System"
-TODO: Maybe split the lift vector by the prop count and apply every revolution? (maybe not idk) "Force-Per-Prop" Lite™ Implementation
-TODO: Aerodynamics
-	- Roll  / Pitch control factors?
-TODO: Hover mode for picking things up
-	- Balances Helicopter 
-	- Limits Yaw and Pitch to 5 degrees or something 
+TODOS in Order of Priority
 
 TODO: Overall flight feels lame still and hard
 
-TODO: Solve Joint Bouncyness
+TODO: Systematic Clean Cohesive Refiend and Organized Helicopter Modules
+	- Need integrating Curves might be more useful  
+	- Need to figure out if typed dictionaries are a shareable type for 4.4 
+	- Need to be able to manipulate stats easily, it is currently hard to navigate   
 
-TODO: Cohesive & Refined Helicopter Module / Health System 
+
+TODO: Reactive Destruction Health System
+	- TODO: Cleaner version of prop damage -> Component Damage "System"
+
+TODO: Wear and Tear - "Machines Breakdown". IE Fuel, but for modules
+	- Durabilities for Engine, Rotor, 
+	- TODO: Boost
+		- Boosting for too long damages aircraft 
+TODO: Hover mode for picking things up
+	- Balances Helicopter
+	- Limits Yaw and Pitch to 5 degrees or something 
+TODO: Weapon Crosshairs / Mouse Flight ? (Prob Not)
+
+TODO: Changes Everything [Mouse Flight](https://github.com/brihernandez/MouseFlight)
+
+
 
 TODO: Variables Needed. 
 	- AoA 
 	- Sea Level Altitude
 
-TODO: Clean the rest of these variables, refactor and reorganize 
 
-TODO: Weapon Crosshairs / Mouse Flight ? (Prob Not)
-https://github.com/brihernandez/MouseFlight
+
+TODO: Aerodynamics
+	- Add some kind of vortex condition where if the current velocity is opposite of the updaward velocity, then reduce upward coefficient 
+	- Roll / Pitch control factors?
+	- TODO: Proper Conditions where rotor speed falls and increases (currently we hardcode based on whether we increase collective to above 80%)
+	- TODO: [x] Engine Spool Down / Turn Off 
+		- Double check math
+	- TODO: We need to somehow apply a damping Anti Torque from the tail rotor, or some kind of auto leveling force so hitting "Q/E" doesn't send u spinning
+	- TODO: Translational Lift / Movement
+		- Adding a dead zone is may be the right move
+	- TODO: Understand and implement induced drag? 
+	- TODO: Understand and implement vortex ring state
+	- TODO: Understand and implement retreating blade stall
+	- TODO: Refactor to an engine Engine Curve?
+	- TODO: Ground Effect?
+	- TODO: Autorotation?
+	- TODO: VRS?
+	- TODO: Maybe split the lift vector by the prop count and apply every revolution? (maybe not idk) "Force-Per-Prop" Lite™ Implementation
+
+
+TODO: Solve Joint Bouncyness [May get solved with 4.4]
+TODO: Clean + Polished UI Elements
+TODO: Better Loadout Experience 
+
+
+TODO: Add an option so we can instiantiate from a flying state. 
+
 
 ---
 Dream TODOs:
 TODO: Rigid body AI Implementation?
 	- We could maybe limit the AI to hard set amount of degrees of rotational freedom to keep flight super stable. Maybe IDK. 
 
-TODO: Clean + Polished UI
 TODO: Make shareable DEMO
-
-
-TODO:
-	Reactive Destruction
 
 """
 # TODO: Change this to a helicopter state variable
@@ -78,6 +89,9 @@ enum HELICOPTER_LIGHT_STATES {
 
 
 
+@onready var ui_controller: Node3D = $UI_Controller
+
+@export var helicopter_camera_base: Helicopter_Camera_Base
 @export var tail_rotor_marker: Marker3D
 @onready var main_rotor_shaft: Marker3D = $MainRotorShaft
 @onready var main_rotor_shaft_mesh: MeshInstance3D = $MainRotorShaft/MainRotorShaftMesh
@@ -85,6 +99,7 @@ enum HELICOPTER_LIGHT_STATES {
 @export var tail_rotor_mesh: Node3D
 @onready var engine_light: MeshInstance3D = $EngineLight
 @onready var sky_hook_attachment: MeshInstance3D = $Sky_Hook_Attachment
+@onready var loadout_gui: Node3D = $UI_Controller/LoadoutGUI
 
 
 const ROPE = preload("res://scenes/Rope.tscn")
@@ -98,12 +113,10 @@ var rope_instance: JoltPinJoint3D
 var debug: bool = false
 
 
-
 ### --- Constants ---
+var GRAVITY = ProjectSettings.get_setting("physics/3d/default_gravity")
 const LBS_TO_KG: float = 0.454
 const TAIL_ROTOR_MAX_FORCE: float = 100000.0
-var GRAVITY = ProjectSettings.get_setting("physics/3d/default_gravity")
-
 const PITCH_FORCE_COEFFICIENT: float = 100000.0
 const ROLL_FORCE_COEFFICIENT: float = 30000.0
 
@@ -112,7 +125,11 @@ var weight: float
 
 ### State Variables
 var is_landed = false
+var landing_progress = 0
+var landing_timer = 0.0
 var is_on_helipad = false
+var landing_time_threshold = 5
+
 var move: Vector3 = Vector3.ZERO
 var sky_hook_deployed: bool = false
 var hover_mode: bool = false
@@ -204,8 +221,19 @@ var engine_spool_down_progress: float = 0.0
 var engine_health: float = 100.0  # Starts at 100, degrades over events
 var engine_health_threshold: float = 25.0  # Threshold below which health is critical
 
-
-
+# Boost - This is a want, but might need to do with jet instead
+var is_boosting: bool = false
+var power_addend = 1
+var boosting_timer: float = 0.0
+var boost_time_till_damage = 5.0
+var boost_damage: float = 0.0
+func apply_boost(delta: float):
+	# speed += 10
+	boosting_timer += delta
+	if boosting_timer >= boost_time_till_damage:
+		# module.take_damage()
+		pass
+	
 
 ### Rotor state
 var collective_pitch_response: float = .01  # Speed of pitch adjustment
@@ -263,13 +291,9 @@ var ground_effect_multiplier: float:
 
 
 ### UI
-@onready var loadout_menu: CanvasLayer = $LoadoutMenu
-@onready var helicopter_ui: CanvasLayer = $HelicopterUi
-enum ENUM_HELICOPTER_HUDS {
-	LOADOUT_MENU,
-	HELICOPTER_HUD
+enum current_UI {
+	
 }
-var current_helicopter_hud: ENUM_HELICOPTER_HUDS = ENUM_HELICOPTER_HUDS.LOADOUT_MENU
 
 
 
@@ -286,21 +310,30 @@ func _unhandled_input(event):
 	if event is InputEventKey:
 		if event.pressed and event.keycode == KEY_ESCAPE:
 			get_tree().quit()
+	
 
 func _input(_event: InputEvent):
 	if Input.is_action_pressed("F"):
 		toggle_sky_hook()
 	if Input.is_action_pressed("C"):
 		toggle_hover_mode()
-	if Input.is_action_pressed("T"):
-		if current_helicopter_hud == ENUM_HELICOPTER_HUDS.LOADOUT_MENU:
-			current_helicopter_hud = ENUM_HELICOPTER_HUDS.HELICOPTER_HUD
-			helicopter_ui.visible = true
-			loadout_menu.visible = false
-		else:
-			current_helicopter_hud = ENUM_HELICOPTER_HUDS.LOADOUT_MENU
-			loadout_menu.visible = true
-			helicopter_ui.visible = false
+	#if Input.is_action_pressed("T"):
+		#if current_helicopter_hud == ENUM_HELICOPTER_HUDS.LOADOUT_MENU:
+			#current_helicopter_hud = ENUM_HELICOPTER_HUDS.HELICOPTER_HUD
+			#helicopter_ui.visible = true
+			#loadout_menu.visible = false
+		#else:
+			#current_helicopter_hud = ENUM_HELICOPTER_HUDS.LOADOUT_MENU
+			#loadout_menu.visible = true
+			#helicopter_ui.visible = false
+	
+	if Input.is_action_just_pressed("TAB") and is_landed:
+		toggle_loadout_camera()
+
+func toggle_loadout_camera():
+	helicopter_camera_base.toggle_loudout_camera_state()
+	ui_controller.toggle_helicopter_hud()
+	ui_controller.toggle_loadout_gui()
 
 
 func _process(delta):
@@ -333,6 +366,9 @@ func _process(delta):
 
 
 func _physics_process(delta: float) -> void:
+	
+	determine_if_landed(delta)
+	
 	
 	if is_engine_spooling_up: 
 		engine_spool_up(delta)
@@ -645,7 +681,26 @@ func toggle_hover_mode():
 		hover_mode = true
 	else:
 		hover_mode = false
-	
+
+
+func determine_if_landed(delta: float) -> void:
+	# Here, is_on_ground is a flag you would set based on your collision or raycast checks
+	if is_on_ground:
+		landing_timer += delta
+		landing_progress += 1  # From your snippet; you can decide how you use landing_progress %%
+		
+		if landing_timer >= landing_time_threshold:
+			# Ship/plane has been on the ground for at least 'landing_time_threshold' seconds
+			# This is where you’d confirm the landing logic or trigger a “landed” state
+			print("Landing complete. Landed for ", landing_timer, " seconds.")
+			is_landed = true
+	else:
+		# Reset the timer if not on ground
+		landing_timer = 0.0
+		is_landed = false
+		
+		
+
 
 
 
@@ -653,6 +708,8 @@ func toggle_hover_mode():
 #region Loadout
 ### Vehicle Components & Weapon Systems
 """
+Almost somewhat there, still need typed dictionaries though
+
 Loadouts
 toggle right / left weapons subsystem
 (mid slot, small slot)
@@ -665,7 +722,9 @@ Set Medium Slot
 - Rocket Pod B
 """
 @export_group("Vehicle Loadout")
-@export var vehicle_components: Array[Helicopter_Component]
+## This is the list of "breakable" components to a vehicle
+var vehicle_components: Array[Helicopter_Component]
+
 @export var left_weapon_subsystem_point: Node3D
 @export var right_weapon_subsystem_point: Node3D
 
@@ -707,6 +766,7 @@ var medium_weapons_modules = {
 
 
 ## Adds the Left weapon system to the helicopter
+## TODO: Figure out better optional tooling functionality later
 @export var has_left_subsystem: bool = false:
 	set(val):
 		has_left_subsystem = val
@@ -728,7 +788,7 @@ var right_weapon_subsystem: Helicopter_Weapon_Subsystem
 
 
 
-func add_weapon_subsystem_to_helo(subsystem_side: Helicopter_Weapon_Subsystem.SIDE):
+func update_weapon_subsystem_to_helo(subsystem_side: Helicopter_Weapon_Subsystem.SIDE):
 	if subsystem_side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		var node = LEFT_WEAPON_SUBSYSTEM.instantiate()
 		left_weapon_subsystem_point.add_child(node)
@@ -751,7 +811,7 @@ func remove_subsystem_from_helo(subsystem_side: Helicopter_Weapon_Subsystem.SIDE
 			nodes.queue_free()
 
 
-func add_subsystem_small_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: SMALL_WEAPONS_MODULE_NAMES):
+func update_subsystem_small_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: SMALL_WEAPONS_MODULE_NAMES):
 	if side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
 		for nodes in left_weapon_subsystem.small_slot_a.get_children():
@@ -774,7 +834,7 @@ func add_subsystem_small_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: SMAL
 		right_weapon_subsystem.small_slot_a.add_child(node) 
 	return
 
-func add_subsystem_medium_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: MEDIUM_WEAPONS_MODULE_NAMES):
+func update_subsystem_medium_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: MEDIUM_WEAPONS_MODULE_NAMES):
 	if side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
 		for nodes in left_weapon_subsystem.medium_slot_a.get_children():
@@ -805,14 +865,14 @@ func apply_modules_to_ship():
 	Either here or somewhere be able to allow a single function that makes a helicopter with everything applied
 	"""
 	if has_left_subsystem:
-		add_weapon_subsystem_to_helo(Helicopter_Weapon_Subsystem.SIDE.LEFT)
-		add_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_small_slot_a)
-		add_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_medium_slot_b)
+		update_weapon_subsystem_to_helo(Helicopter_Weapon_Subsystem.SIDE.LEFT)
+		update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_small_slot_a)
+		update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_medium_slot_b)
 	
 	if has_right_subsystem:
-		add_weapon_subsystem_to_helo(Helicopter_Weapon_Subsystem.SIDE.RIGHT)
-		add_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_small_slot_a)
-		add_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_medium_slot_b)
+		update_weapon_subsystem_to_helo(Helicopter_Weapon_Subsystem.SIDE.RIGHT)
+		update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_small_slot_a)
+		update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_medium_slot_b)
 		
 
 ### return to this when I need to turn into a tool, but not for now
