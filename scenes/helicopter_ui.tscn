@@ -60,3 +60,23 @@ text = "sky hook"
 [node name="hover_mode" type="Label" parent="RightBox"]
 layout_mode = 2
 text = "hover mode"
+
+[node name="Engine Modules" type="VBoxContainer" parent="."]
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -25.0
+offset_right = 93.0
+offset_bottom = 25.0
+grow_vertical = 2
+
+[node name="Engine Module" type="Label" parent="Engine Modules"]
+layout_mode = 2
+text = "Engine Heat"
+
+[node name="Oil Module" type="Label" parent="Engine Modules"]
+layout_mode = 2
+text = "Engine Heat"
+
+[node name="Gas Tank" type="Label" parent="Engine Modules"]
+layout_mode = 2

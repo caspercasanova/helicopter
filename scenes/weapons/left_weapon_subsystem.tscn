@@ -9,11 +9,11 @@ size = Vector3(0.8, 0.2, 0.2)
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_b8coe"]
 points = PackedVector3Array(0.4, 0.1, 0.1, 0.4, 0.1, -0.1, -0.4, 0.1, 0.1, 0.4, -0.1, 0.1, 0.4, -0.1, -0.1, -0.4, 0.1, -0.1, -0.4, -0.1, 0.1, -0.4, -0.1, -0.1)
 
-[node name="Left Weapon Subsystem" type="Node3D" node_paths=PackedStringArray("joint", "medium_slot_a", "small_slot_a")]
+[node name="Left Weapon Subsystem" type="Node3D" node_paths=PackedStringArray("joint", "small_slot", "medium_slot")]
 script = ExtResource("1_0h767")
 joint = NodePath("Left Weapon Subsystem Rigid/Joint")
-medium_slot_a = NodePath("Left Weapon Subsystem Rigid/Med Slot A")
-small_slot_a = NodePath("Left Weapon Subsystem Rigid/Small Slot A")
+small_slot = NodePath("Left Weapon Subsystem Rigid/Small Slot")
+medium_slot = NodePath("Left Weapon Subsystem Rigid/Med Slot")
 
 [node name="Left Weapon Subsystem Rigid" type="RigidBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0112449, 0, 0)
@@ -35,10 +35,10 @@ solver_velocity_iterations = 2
 solver_position_iterations = 2
 transform = Transform3D(1, 1.42109e-14, 0, -1.42109e-14, 1, 0, 0, 0, 1, -5.96047e-08, -2.38419e-07, 1.49012e-08)
 
-[node name="Med Slot A" type="Node3D" parent="Left Weapon Subsystem Rigid"]
+[node name="Med Slot" type="Node3D" parent="Left Weapon Subsystem Rigid"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0488485, -0.123369, 0)
 
-[node name="Small Slot A" type="Node3D" parent="Left Weapon Subsystem Rigid"]
+[node name="Small Slot" type="Node3D" parent="Left Weapon Subsystem Rigid"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.432998, -0.0954499, 0)
 
 [connection signal="body_entered" from="Left Weapon Subsystem Rigid" to="Left Weapon Subsystem Rigid" method="_on_body_entered"]

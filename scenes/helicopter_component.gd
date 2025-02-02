@@ -1,8 +1,10 @@
 class_name Helicopter_Component extends RigidBody3D
 
 
+# Should probably change this to Helicopter_Attachment
+# Thinking being, extra armor attachments, or gun pods etc... 
 
-const DAMAGE_SPEED_THRESHOLD = 0.01
+const COLLISION_DAMAGE_SPEED_THRESHOLD = 0.01
 @export var health: int = 100
 @onready var joint: JoltHingeJoint3D = $Joint
 
@@ -16,12 +18,12 @@ func _on_body_entered(body: Node) -> void:
 		var relative_speed = (body.linear_velocity - linear_velocity).length()
 
 		# Calculate and inflict damage if relative speed exceeds threshold
-		if relative_speed > DAMAGE_SPEED_THRESHOLD:
+		if relative_speed > COLLISION_DAMAGE_SPEED_THRESHOLD:
 			inflict_damage(relative_speed)
 			print('Destroying joint due to high-speed impact.')
 			if joint:
 				joint.queue_free()
-				joint=null
+				joint = null
 	else:
 		# For bodies without linear_velocity (e.g., StaticBody3D or other nodes), use impact velocity and mass
 		print('Taking damage from collision with static or unmovable body.')
@@ -37,7 +39,7 @@ func _on_body_entered(body: Node) -> void:
 		var impact_force = mass * impact_velocity
 
 		# Inflict damage if impact force exceeds threshold
-		if impact_force > DAMAGE_SPEED_THRESHOLD:
+		if impact_force > COLLISION_DAMAGE_SPEED_THRESHOLD:
 			inflict_damage(impact_force)
 			if joint:
 				joint.queue_free()

@@ -14,11 +14,25 @@ TODOS in Order of Priority
 
 TODO: Overall flight feels lame still and hard
 
-TODO: Systematic Clean Cohesive Refiend and Organized Helicopter Modules
+
+# Helicopter Modules 
+Oil
+Has Temp
+Has Amount 
+Feeds Engine Oil. 100% Health = 100 Engine Consumption Rate  
+
+Engine Outputs HorsePower To Prop Shaft
+Builds Heat
+Oil removes Heat
+Engine Coolsdown based on Oil Rate. 
+
+Propshaft Spins
+
+TODO: Systematic Clean Cohesive Refined and Organized Helicopter Modules
+	- Am I doing a centralized programming flow? Or Model View Controll vibe?
 	- Need integrating Curves might be more useful  
 	- Need to figure out if typed dictionaries are a shareable type for 4.4 
 	- Need to be able to manipulate stats easily, it is currently hard to navigate   
-
 
 TODO: Reactive Destruction Health System
 	- TODO: Cleaner version of prop damage -> Component Damage "System"
@@ -27,19 +41,28 @@ TODO: Wear and Tear - "Machines Breakdown". IE Fuel, but for modules
 	- Durabilities for Engine, Rotor, 
 	- TODO: Boost
 		- Boosting for too long damages aircraft 
+		- Overheating modules
 TODO: Hover mode for picking things up
 	- Balances Helicopter
-	- Limits Yaw and Pitch to 5 degrees or something 
-TODO: Weapon Crosshairs / Mouse Flight ? (Prob Not)
+	- Limits Roll and Pitch to 5 degrees or something 
+
+
+TODO: Raycast Penetration Tooling 
+TODO: Confirm that we can make penetration code 
+TODO: Explore potentials for different vehicle attachment systems 
 
 TODO: Changes Everything [Mouse Flight](https://github.com/brihernandez/MouseFlight)
-
-
+TODO: Weapon Crosshairs / Mouse Flight ? (Prob Not)
+Cameras 
+	TODO: Raycast Crosshairs on 2D projection 
+	TODO: Lerp camera to mouse Movement
 
 TODO: Variables Needed. 
 	- AoA 
 	- Sea Level Altitude
 
+TODO: Make un/controllable toggle from Player POV
+	- Currently Hardcoded for player control 
 
 
 TODO: Aerodynamics
@@ -64,28 +87,34 @@ TODO: Aerodynamics
 TODO: Solve Joint Bouncyness [May get solved with 4.4]
 TODO: Clean + Polished UI Elements
 TODO: Better Loadout Experience 
+TODO: Eject Function
 
+TODO: UI Signals
+	- Landed 
+	- Avionics
+	- Progress bars  
+	- Menus  
 
 TODO: Add an option so we can instiantiate from a flying state. 
 
 
+Future Traits that would be awesome once godot implements traits.
+	- Bullet Immune
+	- Air Cargo
+	- Can react to explosion physics
+	- Damageable
+
+TODO: Explore Darkness 
+
 ---
 Dream TODOs:
-TODO: Rigid body AI Implementation?
+TODO: Rigid body AI Implementation? TBH not even sure how to approach this. 
 	- We could maybe limit the AI to hard set amount of degrees of rotational freedom to keep flight super stable. Maybe IDK. 
 
 TODO: Make shareable DEMO
 
 """
-# TODO: Change this to a helicopter state variable
-# Loading, Landing, Repairing, Injured, Green Light
-enum HELICOPTER_LIGHT_STATES {
-	LANDED,
-	REPAIRING,
-	CARRYING_OBJECT,
-	GREEN_LIGHT,
-	CRITICAL,
-}
+
 
 
 
@@ -101,11 +130,37 @@ enum HELICOPTER_LIGHT_STATES {
 @onready var sky_hook_attachment: MeshInstance3D = $Sky_Hook_Attachment
 @onready var loadout_gui: Node3D = $UI_Controller/LoadoutGUI
 
+## Used for XRay Mode
+@onready var body: MeshInstance3D = $Fuselage/Body
+@onready var mesh_instance_3d_2: MeshInstance3D = $Fuselage/MeshInstance3D2
+@onready var mesh_instance_3d_3: MeshInstance3D = $Fuselage/MeshInstance3D3
+@onready var mesh_instance_3d_4: MeshInstance3D = $Fuselage/MeshInstance3D4
+var fuselage_meshes: Array[MeshInstance3D] = [body, mesh_instance_3d_2, mesh_instance_3d_3, mesh_instance_3d_4]
+
+@export var xray_mode: bool = false:
+	set(value):
+		if value:
+			set_meshes_transparent()
+		else: 
+			set_meshes_non_transparent()
+
+
+func set_meshes_transparent():
+	for mesh in fuselage_meshes:
+		mesh.mesh.material.albedo_color = "#3a3a3aa2"
+		mesh.mesh.material.transparency = 1
+	pass
+
+func set_meshes_non_transparent():
+	for mesh in fuselage_meshes:
+		mesh.mesh.material.transparency = 0
+		mesh.mesh.albedo_color = "3a3a3a"
+	pass
+
 
 const ROPE = preload("res://scenes/Rope.tscn")
 var rope_instance: JoltPinJoint3D
 
-### --- Exported Variables ---
 @export var weight_in_lbs: float = 10000.0
 
 
@@ -128,7 +183,7 @@ var is_landed = false
 var landing_progress = 0
 var landing_timer = 0.0
 var is_on_helipad = false
-var landing_time_threshold = 5
+var landing_time_threshold = 1
 
 var move: Vector3 = Vector3.ZERO
 var sky_hook_deployed: bool = false
@@ -264,7 +319,7 @@ var tip_velocity: float:
 @export var total_drag_curve: Curve
 @export var max_lift_coefficient: float = 1.5  # Maximum lift at full collective pitch
 
-var main_rotor_lift_force: float = 0.0
+#var main_rotor_lift_force: float = 0.0
 var air_density: float = 1.225  # kg/m³ (air density at sea level)
 var reference_area: float = 5.0  # m² (frontal area exposed to the air)
 var lift_coefficient: float = 1.5  # Example coefficient of lift
@@ -282,18 +337,16 @@ var ground_effect_multiplier: float:
 
 
 ### Aerodynamics / Control Factor
-### Control factor can essentially be "Aero dynamics"
+### Control factor can essentially be "Aerodynamics"
 @export var max_tilt_angle: float = 60.0  # Maximum allowed tilt angle before control reduces
 @export var max_speed_for_control: float = 10.0  # Maximum speed before control authority is reduced
 
 
+@export_category("Helicopter Modules")
+@export var engine_module: Helicopter_Engine_Module
+@export var oil_module: Helicopter_Oil_Module
+@export var gas_tank_module: Helicopter_Gas_Tank_Module
 
-
-
-### UI
-enum current_UI {
-	
-}
 
 
 
@@ -304,6 +357,7 @@ func _ready():
 	self.mass = weight
 	cursor_pointer.top_level = true
 	apply_modules_to_ship()
+	fuselage_meshes = [body, mesh_instance_3d_2, mesh_instance_3d_3, mesh_instance_3d_4]
 	
 
 func _unhandled_input(event):
@@ -312,7 +366,7 @@ func _unhandled_input(event):
 			get_tree().quit()
 	
 
-func _input(_event: InputEvent):
+func _input(event: InputEvent):
 	if Input.is_action_pressed("F"):
 		toggle_sky_hook()
 	if Input.is_action_pressed("C"):
@@ -326,6 +380,13 @@ func _input(_event: InputEvent):
 			#current_helicopter_hud = ENUM_HELICOPTER_HUDS.LOADOUT_MENU
 			#loadout_menu.visible = true
 			#helicopter_ui.visible = false
+	if event.is_action_pressed("LMB"):
+		print("Firing from _input")
+		fire_small_slot()
+
+	if event.is_action_pressed("RMB"):
+		print("Firing from _input")
+		fire_medium_slot()
 	
 	if Input.is_action_just_pressed("TAB") and is_landed:
 		toggle_loadout_camera()
@@ -622,7 +683,7 @@ func calculate_relative_altitude() -> void:
 
 
 func spin_rotors(delta: float):
-   # Convert radians per second (main_rotor_speed) to degrees per second
+	# Convert radians per second (main_rotor_speed) to degrees per second
 	var degrees_per_second = main_rotor_speed * (180 / PI)
 
 	main_rotor_shaft_mesh.rotation_degrees.y += degrees_per_second * delta
@@ -636,30 +697,53 @@ func spin_rotors(delta: float):
 
 
 
-# Light color states
-var green_color = Color(0, 1, 0)
-var red_color = Color(1, 0, 0)
-var orange_color = Color(0.945, 0.557, 0.02)
-var flashing_red = false
+# TODO: Change this to a helicopter state variable
+# Think of these as a logger. Priotity logging a la "winston npm package"
+# Helicopter Status & Light States
+# Loading, Landing, Repairing, Injured, Green Light
+enum HELICOPTER_LIGHT_STATES {
+	LANDED,
+	REPAIRING,
+	CARRYING_OBJECT,
+	GREEN_LIGHT,
+	CRITICAL,
+}
+
+var light_colors = {
+	HELICOPTER_LIGHT_STATES.LANDED: Color(0.906, 0.833, 0.918),
+	HELICOPTER_LIGHT_STATES.REPAIRING: Color(0.196, 0.231, 1),
+	HELICOPTER_LIGHT_STATES.CARRYING_OBJECT: Color(0.945, 0.557, 0.02),
+	HELICOPTER_LIGHT_STATES.GREEN_LIGHT: Color(0, 1, 0),
+	HELICOPTER_LIGHT_STATES.CRITICAL: Color(1, 0, 0),
+	}
+
+var flashing = false
 var flash_timer: float = 0.0
 var flash_duration: float = 0.5  # Half a second for flashing interval
 
 func update_engine_light(delta: float):
 	if engine_health > engine_health_threshold and engine_spool_up_complete and sky_hook_deployed:
-		engine_light.mesh.material.albedo_color = orange_color
+		engine_light.mesh.material.albedo_color = light_colors[HELICOPTER_LIGHT_STATES.CARRYING_OBJECT]
 	elif engine_health < engine_health_threshold:
 		# Flashing red light for critical engine health
 		flash_timer += delta
 		if flash_timer >= flash_duration:
-			flashing_red = !flashing_red  # Toggle flashing state
+			flashing = !flashing  # Toggle flashing state
 			flash_timer = 0.0
-		engine_light.mesh.material.albedo_color = red_color if flashing_red else Color(1, 1, 1)  # Flash red and white
+		engine_light.mesh.material.albedo_color = light_colors[HELICOPTER_LIGHT_STATES.CRITICAL] if flashing else light_colors[HELICOPTER_LIGHT_STATES.LANDED]  # Flash red and white
 	elif engine_spool_up_complete:
 		# Set the engine light to green when engine power is sufficient for lift
-		engine_light.mesh.material.albedo_color = green_color
+		engine_light.mesh.material.albedo_color = light_colors[HELICOPTER_LIGHT_STATES.GREEN_LIGHT]
 	else:
 		# Set the engine light to red when the engine is still starting up
-		engine_light.mesh.material.albedo_color = red_color
+		engine_light.mesh.material.albedo_color = light_colors[HELICOPTER_LIGHT_STATES.CRITICAL]
+
+func determine_state():
+	pass 
+
+
+
+
 
 
 func toggle_sky_hook():
@@ -692,7 +776,7 @@ func determine_if_landed(delta: float) -> void:
 		if landing_timer >= landing_time_threshold:
 			# Ship/plane has been on the ground for at least 'landing_time_threshold' seconds
 			# This is where you’d confirm the landing logic or trigger a “landed” state
-			print("Landing complete. Landed for ", landing_timer, " seconds.")
+			#print("Landing complete. Landed for ", landing_timer, " seconds.")
 			is_landed = true
 	else:
 		# Reset the timer if not on ground
@@ -781,11 +865,32 @@ var left_weapon_subsystem: Helicopter_Weapon_Subsystem
 var right_weapon_subsystem: Helicopter_Weapon_Subsystem
 
 
-@export var left_weapon_system_small_slot_a: SMALL_WEAPONS_MODULE_NAMES = SMALL_WEAPONS_MODULE_NAMES.NONE
-@export var left_weapon_system_medium_slot_b: MEDIUM_WEAPONS_MODULE_NAMES = MEDIUM_WEAPONS_MODULE_NAMES.NONE
-@export var right_weapon_system_small_slot_a: SMALL_WEAPONS_MODULE_NAMES = SMALL_WEAPONS_MODULE_NAMES.NONE
-@export var right_weapon_system_medium_slot_b: MEDIUM_WEAPONS_MODULE_NAMES = MEDIUM_WEAPONS_MODULE_NAMES.NONE
+@export var left_weapon_system_small_slot: SMALL_WEAPONS_MODULE_NAMES = SMALL_WEAPONS_MODULE_NAMES.NONE
+@export var left_weapon_system_medium_slot: MEDIUM_WEAPONS_MODULE_NAMES = MEDIUM_WEAPONS_MODULE_NAMES.NONE
+@export var right_weapon_system_small_slot: SMALL_WEAPONS_MODULE_NAMES = SMALL_WEAPONS_MODULE_NAMES.NONE
+@export var right_weapon_system_medium_slot: MEDIUM_WEAPONS_MODULE_NAMES = MEDIUM_WEAPONS_MODULE_NAMES.NONE
 
+var current_weapons = {
+	left_weapon_system_small_slot: null,
+	left_weapon_system_medium_slot: null,
+	right_weapon_system_small_slot: null,
+	right_weapon_system_medium_slot: null,
+}
+
+func fire_small_slot():
+	if current_weapons.left_weapon_system_small_slot and current_weapons.left_weapon_system_small_slot.has_method("fire"):
+		current_weapons.left_weapon_system_small_slot.fire()
+	if current_weapons.right_weapon_system_small_slot and current_weapons.right_weapon_system_small_slot.has_method("fire"):
+		current_weapons.right_weapon_system_small_slot.fire()
+
+func fire_medium_slot():
+	if current_weapons.left_weapon_system_medium_slot and current_weapons.left_weapon_system_medium_slot.has_method("fire"):
+		current_weapons.left_weapon_system_medium_slot.fire()
+		print(current_weapons.left_weapon_system_medium_slot)
+		
+	if current_weapons.right_weapon_system_medium_slot and current_weapons.right_weapon_system_medium_slot.has_method("fire"):
+		current_weapons.right_weapon_system_medium_slot.fire()
+		print(current_weapons.right_weapon_system_medium_slot)
 
 
 func update_weapon_subsystem_to_helo(subsystem_side: Helicopter_Weapon_Subsystem.SIDE):
@@ -814,48 +919,56 @@ func remove_subsystem_from_helo(subsystem_side: Helicopter_Weapon_Subsystem.SIDE
 func update_subsystem_small_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: SMALL_WEAPONS_MODULE_NAMES):
 	if side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
-		for nodes in left_weapon_subsystem.small_slot_a.get_children():
+		for nodes in left_weapon_subsystem.small_slot.get_children():
 			nodes.queue_free()
 		
 		if item == SMALL_WEAPONS_MODULE_NAMES.NONE:
+			current_weapons.left_weapon_system_small_slot = null
 			return
 		
 		var node = small_weapons_modules[item].instantiate()
-		left_weapon_subsystem.small_slot_a.add_child(node) 
+		left_weapon_subsystem.small_slot.add_child(node)
+		current_weapons.left_weapon_system_small_slot = node
 	elif side == Helicopter_Weapon_Subsystem.SIDE.RIGHT:
 		assert(has_right_subsystem, "Need to have a left subsystem to add weapon")
-		for nodes in right_weapon_subsystem.small_slot_a.get_children():
+		for nodes in right_weapon_subsystem.small_slot.get_children():
 			nodes.queue_free()
 		
 		if item == SMALL_WEAPONS_MODULE_NAMES.NONE:
+			current_weapons.right_weapon_system_small_slot = null
 			return
 		
 		var node = small_weapons_modules[item].instantiate()
-		right_weapon_subsystem.small_slot_a.add_child(node) 
+		right_weapon_subsystem.small_slot.add_child(node) 
+		current_weapons.right_weapon_system_small_slot = node
 	return
 
 func update_subsystem_medium_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: MEDIUM_WEAPONS_MODULE_NAMES):
 	if side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
-		for nodes in left_weapon_subsystem.medium_slot_a.get_children():
+		for nodes in left_weapon_subsystem.medium_slot.get_children():
 			nodes.queue_free()
 		
 		if item == MEDIUM_WEAPONS_MODULE_NAMES.NONE:
+			current_weapons.left_weapon_system_medium_slot = null
 			return
 		
 		var node = medium_weapons_modules[item].instantiate()
-		left_weapon_subsystem.medium_slot_a.add_child(node)
+		left_weapon_subsystem.medium_slot.add_child(node)
+		current_weapons.left_weapon_system_medium_slot = node
 		
 	elif side == Helicopter_Weapon_Subsystem.SIDE.RIGHT:
 		assert(has_right_subsystem, "Need to have a left subsystem to add weapon")
-		for nodes in right_weapon_subsystem.medium_slot_a.get_children():
+		for nodes in right_weapon_subsystem.medium_slot.get_children():
 			nodes.queue_free()
 		
 		if item == MEDIUM_WEAPONS_MODULE_NAMES.NONE:
+			current_weapons.right_weapon_system_medium_slot = null
 			return
 		
 		var node = medium_weapons_modules[item].instantiate()
-		right_weapon_subsystem.medium_slot_a.add_child(node) 
+		right_weapon_subsystem.medium_slot.add_child(node)
+		current_weapons.right_weapon_system_medium_slot = node
 	return
 
 
@@ -866,13 +979,13 @@ func apply_modules_to_ship():
 	"""
 	if has_left_subsystem:
 		update_weapon_subsystem_to_helo(Helicopter_Weapon_Subsystem.SIDE.LEFT)
-		update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_small_slot_a)
-		update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_medium_slot_b)
+		update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_small_slot)
+		update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, left_weapon_system_medium_slot)
 	
 	if has_right_subsystem:
 		update_weapon_subsystem_to_helo(Helicopter_Weapon_Subsystem.SIDE.RIGHT)
-		update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_small_slot_a)
-		update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_medium_slot_b)
+		update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_small_slot)
+		update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, right_weapon_system_medium_slot)
 		
 
 ### return to this when I need to turn into a tool, but not for now
@@ -923,7 +1036,14 @@ func apply_modules_to_ship():
 	#
 	#return null
 
-
+"""
+Ammo
+"""
+func replenish_ammo():
+	print("Replenish ammo function")
+	pass
+	
+"""Could use a simple point process to determine choatic trigger pulls the idea being that the more someone clicks a button the more likely a malfunction occurs"""
 
 #endregion
 
@@ -1033,11 +1153,15 @@ func apply_damage_to_props(_body: Node3D, prop: Area3D) -> void:
 		# If the impact force exceeds the destroy threshold, destroy the propeller
 		if impact_force > prop_destroy_threshold:
 			prop.queue_free()
+			main_rotor_area = 0
 
 func react_to_damage():
 	# prop damage reduces prop output
 	# engine power is has a engine health coefficient
 	pass
+
+
+
 
 
 #endregion

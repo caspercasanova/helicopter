@@ -12,16 +12,17 @@ extends CanvasLayer
 @onready var g_force: Label = $"VBoxContainer/g force"
 @onready var speed: Label = $VBoxContainer/speed
 @onready var hover_mode: Label = $RightBox/hover_mode
+@onready var engine_modules: VBoxContainer = $"Engine Modules"
 
 
-var vehicle_node: Helicopter = null
+var helicopter_node: Helicopter = null
 
 func _init():
 	UI.connect("helicopter_vehicle_updated", _vehicle_changed)
 	
 
 func _vehicle_changed(data: Helicopter):
-	vehicle_node = data
+	helicopter_node = data
 
 
 # Called when the node enters the scene tree for the first time.
@@ -31,20 +32,20 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	if !vehicle_node:
+	if !helicopter_node:
 		return
 	# TODO: Need Total Altitude as well 
 	# TODO: Delta Altitude
-	relative_altitude.text=("relative_altitude: " + str(floor(vehicle_node.relative_altitude)))
-	collective.text=("collective" + str(vehicle_node.collective_pitch))
-	rotor_speed.text=("ROTOR RPM" + str(floor(vehicle_node.main_rotor_rpm)))
+	relative_altitude.text=("relative_altitude: " + str(floor(helicopter_node.relative_altitude)))
+	collective.text=("collective" + str(helicopter_node.collective_pitch))
+	rotor_speed.text=("ROTOR RPM" + str(floor(helicopter_node.main_rotor_rpm)))
 	# investigate Smooth step for this?
 	#lift_force.text=("Lift_force" + str(floor(vehicle_node.lift_force)))
-	engine_power.text=("Engine Power" +str(vehicle_node.current_engine_power))
-	ground_force.text=("Ground Force Boost: " +str(vehicle_node.ground_effect_multiplier))
-	sky_hook.text=("Sky Hook Deployed: " + str(vehicle_node.sky_hook_deployed))
-	pitch_angle.text=("Pitch Angle: " +str(vehicle_node.pitch_angle))
-	roll_angle.text=("Roll Angle: " +str(vehicle_node.roll_angle))
-	g_force.text = (str(round(vehicle_node.g_force)) + "  G")
-	speed.text = (str(round(vehicle_node.speed_km)) + "km/h")
-	hover_mode.text = ("Hover Mode Engaged: "+ str(vehicle_node.hover_mode))
+	engine_power.text=("Engine Power" +str(helicopter_node.current_engine_power))
+	ground_force.text=("Ground Force Boost: " +str(helicopter_node.ground_effect_multiplier))
+	sky_hook.text=("Sky Hook Deployed: " + str(helicopter_node.sky_hook_deployed))
+	pitch_angle.text=("Pitch Angle: " +str(helicopter_node.pitch_angle))
+	roll_angle.text=("Roll Angle: " +str(helicopter_node.roll_angle))
+	g_force.text = (str(round(helicopter_node.g_force)) + "  G")
+	speed.text = (str(round(helicopter_node.speed_km)) + "km/h")
+	hover_mode.text = ("Hover Mode Engaged: "+ str(helicopter_node.hover_mode))

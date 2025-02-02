@@ -1,4 +1,7 @@
-[gd_scene load_steps=3 format=3 uid="uid://b68bcx74riv20"]
+[gd_scene load_steps=5 format=3 uid="uid://b68bcx74riv20"]
+
+[ext_resource type="Script" path="res://scenes/weapons/gun.gd" id="1_crkqg"]
+[ext_resource type="AudioStream" uid="uid://dgtt4d2jahp1r" path="res://scenes/weapons/bullets/fire1.wav" id="2_mbqhy"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uxo77"]
 albedo_color = Color(0.192157, 0.137255, 1, 1)
@@ -10,7 +13,15 @@ bottom_radius = 0.05
 height = 0.5
 
 [node name="GunA" type="Node3D"]
+script = ExtResource("1_crkqg")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 mesh = SubResource("CylinderMesh_dn2e0")
+
+[node name="Muzzle" type="Marker3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0.277893)
+gizmo_extents = 0.17
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="."]
+stream = ExtResource("2_mbqhy")

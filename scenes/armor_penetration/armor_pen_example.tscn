@@ -1,0 +1,138 @@
+[gd_scene load_steps=14 format=3 uid="uid://csx7sia5e4cvw"]
+
+[ext_resource type="Script" path="res://scenes/armor_penetration/armor_pen_examples.gd" id="1_llqcd"]
+[ext_resource type="Texture2D" uid="uid://c4ju77nxcrrku" path="res://scenes/armor_penetration/checker.png" id="2_gbcec"]
+[ext_resource type="PackedScene" uid="uid://b2sspifrm1qhr" path="res://scenes/armor_penetration/armor.tscn" id="3_to0hs"]
+[ext_resource type="Script" path="res://addons/Gizmo3DScript/gizmo3D.gd" id="4_xfxjw"]
+[ext_resource type="PackedScene" uid="uid://bidyploqbu3nk" path="res://scenes/armor_penetration/penetration_raycast.tscn" id="5_sv1mu"]
+[ext_resource type="PackedScene" uid="uid://b0n2gc064ev01" path="res://scenes/armor_penetration/round_armor.tscn" id="6_yye6v"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_hm8xn"]
+
+[sub_resource type="Sky" id="Sky_hp8l5"]
+sky_material = SubResource("ProceduralSkyMaterial_hm8xn")
+
+[sub_resource type="Environment" id="Environment_x3aet"]
+background_mode = 2
+sky = SubResource("Sky_hp8l5")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_s5d6f"]
+albedo_texture = ExtResource("2_gbcec")
+uv1_triplanar = true
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ylpd4"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_h2ivc"]
+transparency = 1
+albedo_color = Color(1, 0.862745, 1, 0.588235)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kvyts"]
+material = SubResource("StandardMaterial3D_h2ivc")
+
+[node name="ArmorPen" type="Node3D"]
+script = ExtResource("1_llqcd")
+
+[node name="ArmorPenExamples" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_x3aet")
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.679785, 0)
+use_collision = true
+
+[node name="Floor" type="CSGBox3D" parent="CSGCombiner3D"]
+size = Vector3(128, 1, 128)
+material = SubResource("StandardMaterial3D_s5d6f")
+
+[node name="TestName" type="Label" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -199.0
+offset_top = -34.0
+offset_right = 185.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "Test"
+horizontal_alignment = 1
+
+[node name="Next" type="Button" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -141.0
+offset_top = -63.0
+offset_right = -44.0
+offset_bottom = -21.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "Next >>"
+
+[node name="Previous" type="Button" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 41.0
+offset_top = -63.0
+offset_right = 183.0
+offset_bottom = -21.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "<< Previous
+"
+
+[node name="CameraHolder" type="Node3D" parent="."]
+
+[node name="RotationX" type="Node3D" parent="CameraHolder"]
+
+[node name="Camera3D" type="Camera3D" parent="CameraHolder/RotationX"]
+
+[node name="Testers" type="Node3D" parent="."]
+
+[node name="ArmorPenetrationTest1" type="Node3D" parent="Testers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.459323, 0)
+
+[node name="Gizmo3D" type="Node3D" parent="Testers/ArmorPenetrationTest1" node_paths=PackedStringArray("target")]
+transform = Transform3D(1, 0, 0, 0, -0.000593467, -1, 0, 1, -0.000593467, -0.163053, 0.453864, 1.23005)
+script = ExtResource("4_xfxjw")
+target = NodePath("../PenetrationRaycast")
+
+[node name="PenetrationRaycast" parent="Testers/ArmorPenetrationTest1" instance=ExtResource("5_sv1mu")]
+transform = Transform3D(1, 0, 0, 0, -0.000593467, -1, 0, 1, -0.000593467, -0.163053, 0.453864, 1.23005)
+target_position = Vector3(0, -0.5, 0)
+hit_from_inside = false
+debug_prints = true
+
+[node name="Armor" parent="Testers/ArmorPenetrationTest1" instance=ExtResource("3_to0hs")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.603323, -0.104307)
+
+[node name="ArmorPenetrationTest2" type="Node3D" parent="Testers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.459323, -7.908)
+visible = false
+
+[node name="Armor" parent="Testers/ArmorPenetrationTest2" instance=ExtResource("3_to0hs")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.603323, -0.104307)
+
+[node name="InnerArmor" type="Area3D" parent="Testers/ArmorPenetrationTest2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.584571, -0.0879598)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Testers/ArmorPenetrationTest2/InnerArmor"]
+shape = SubResource("BoxShape3D_ylpd4")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Testers/ArmorPenetrationTest2/InnerArmor"]
+mesh = SubResource("BoxMesh_kvyts")
+
+[node name="ArmorPenetrationTest3" type="Node3D" parent="Testers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.459323, -15.0255)
+visible = false
+
+[node name="RoundArmor" parent="Testers/ArmorPenetrationTest3" instance=ExtResource("6_yye6v")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.006248, 0.436216, -0.163278)
+
+[connection signal="pressed" from="Next" to="ArmorPenExamples" method="_on_next_pressed"]
+[connection signal="pressed" from="Previous" to="ArmorPenExamples" method="_on_previous_pressed"]

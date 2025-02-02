@@ -120,6 +120,16 @@ popup/item_1/id = 1
 popup/item_2/text = "Rocket  B"
 popup/item_2/id = 2
 
+[node name="HBoxContainer3" type="HBoxContainer" parent="SubViewport/Control/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Left Weapon Subsystem Slot A Label" type="Label" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Toggle X Ray Mode"
+
+[node name="Left Weapon Subsystem Slot A" type="CheckButton" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+
 [node name="Quad" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_bqhir")
 surface_material_override/0 = SubResource("StandardMaterial3D_jr5uj")
@@ -133,3 +143,4 @@ shape = SubResource("BoxShape3D_ng28y")
 [connection signal="item_selected" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer/VBoxContainer2/Right Weapon Subsystem Slot A" to="." method="_on_right_weapon_subsystem_slot_a_item_selected"]
 [connection signal="item_selected" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2/VBoxContainer3/Left Weapon Subsystem Slot B" to="." method="_on_left_weapon_subsystem_slot_b_item_selected"]
 [connection signal="item_selected" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2/VBoxContainer4/Right Weapon Subsystem Slot B" to="." method="_on_right_weapon_subsystem_slot_b_item_selected"]
+[connection signal="toggled" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer3/Left Weapon Subsystem Slot A" to="." method="_on_left_weapon_subsystem_slot_a_toggled"]

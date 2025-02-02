@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://bidyploqbu3nk"]
+
+[ext_resource type="Script" path="res://scenes/armor_penetration/penetration_raycast.gd" id="1_p4emr"]
+
+[node name="PenetrationRaycast" type="RayCast3D"]
+hit_from_inside = true
+collide_with_areas = true
+script = ExtResource("1_p4emr")
+debug_prints = false

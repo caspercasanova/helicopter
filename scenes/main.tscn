@@ -423,7 +423,7 @@ material = SubResource("StandardMaterial3D_jpwa2")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -23, 25, -96)
 
 [node name="HeavyObject2" parent="." instance=ExtResource("7_feefi")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58, 31, -33)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58, 31, -31)
 
 [node name="HeavyObject3" parent="." instance=ExtResource("7_feefi")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 21.4809, -36)
@@ -432,5 +432,5 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 23, 21.4809, -36)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 57.6, 29.9, -18)
 
 [node name="Helicopter" parent="." instance=ExtResource("6_hfffq")]
-transform = Transform3D(1, 0, -2.13163e-14, 0, 1, 0, 2.13163e-14, 0, 1, 58, 31.7, -16)
+transform = Transform3D(1, 0, -2.13163e-14, 0, 1, 0, 2.13163e-14, 0, 1, 58.6, 31.7, -16)
 max_speed_for_control = 30.0

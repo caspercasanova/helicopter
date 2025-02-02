@@ -170,3 +170,11 @@ func _on_right_weapon_subsystem_slot_b_item_selected(index: int) -> void:
 		1: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_A)
 		2: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_B)
 	pass
+	
+
+
+func _on_left_weapon_subsystem_slot_a_toggled(toggled_on: bool) -> void:
+	if toggled_on:
+		helicopter.xray_mode = true
+	else: 
+		helicopter.xray_mode = false

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://ds42abku5ccef"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sun53"]
+resource_local_to_scene = true
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hl0nv"]
+resource_local_to_scene = true
+material = SubResource("StandardMaterial3D_sun53")
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.1
+
+[node name="DebugSphere" type="MeshInstance3D"]
+mesh = SubResource("CylinderMesh_hl0nv")

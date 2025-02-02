@@ -1,6 +1,10 @@
 extends Node3D
 
-
+"""
+Things to look at:
+	- Respawn functionality 
+		- Might need to think about a higher level logic process / obserable for this 
+"""
 
 var helicopter_is_on_pad = false
 
@@ -24,7 +28,6 @@ func _on_area_3d_body_exited(body: Node3D) -> void:
 		helicopter_is_on_pad = false
 		body.is_on_helipad = false
 		print("Helicopter has left the pad")
-
 
 
 

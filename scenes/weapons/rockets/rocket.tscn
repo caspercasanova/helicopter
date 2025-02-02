@@ -1,0 +1,53 @@
+[gd_scene load_steps=8 format=3 uid="uid://dd6p0vq8u6rsi"]
+
+[ext_resource type="Script" path="res://scenes/weapons/rockets/rocket.gd" id="1_pgdne"]
+[ext_resource type="PackedScene" uid="uid://drwln44m40por" path="res://scenes/vfx/rocket_smoke.tscn" id="2_1jcbk"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ueep5"]
+top_radius = 0.1
+bottom_radius = 0.1
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8tn3g"]
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_6nbt1"]
+material = SubResource("StandardMaterial3D_8tn3g")
+radius = 0.2
+height = 0.4
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ply46"]
+radius = 0.25
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_f1ujy"]
+height = 1.0
+radius = 0.2
+
+[node name="Rocket" type="RigidBody3D"]
+script = ExtResource("1_pgdne")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CylinderMesh_ueep5")
+
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+mesh = SubResource("SphereMesh_6nbt1")
+
+[node name="Area3D" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.505213)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("SphereShape3D_ply46")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.250123)
+shape = SubResource("CylinderShape3D_f1ujy")
+
+[node name="RocketSmoke" parent="." instance=ExtResource("2_1jcbk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0886135, 0, -0.817827)
+
+[node name="RayCast3D" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0.769501)
+
+[connection signal="body_entered" from="Area3D" to="." method="_on_area_3d_body_entered"]
