@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bhedeg8xwytc4"]
 
-[ext_resource type="Script" path="res://scenes/weapons/blast/blast_sphere.gd" id="1_5blni"]
+[ext_resource type="Script" uid="uid://sw0j7cir815g" path="res://scenes/weapons/blast/blast_sphere.gd" id="1_5blni"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_wwh7p"]
 

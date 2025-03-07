@@ -5,7 +5,7 @@ enum SIDE {
 	LEFT,
 	RIGHT
 }
-@export var joint: JoltHingeJoint3D
+@export var joint: HingeJoint3D
 @export var small_slot: Node3D
 @export var side: SIDE
 @export var medium_slot: Node3D

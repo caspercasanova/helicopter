@@ -1,6 +1,6 @@
 [gd_scene load_steps=23 format=3 uid="uid://inkfxa2qtpy"]
 
-[ext_resource type="Script" path="res://scenes/vfx/explosion.gd" id="1_kfqs0"]
+[ext_resource type="Script" uid="uid://byrgwte00g38k" path="res://scenes/vfx/explosion.gd" id="1_kfqs0"]
 
 [sub_resource type="Curve" id="Curve_xqh8t"]
 _data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.731602, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dscu7s2k73eyy"]
 
-[ext_resource type="Script" path="res://scenes/helicopter_ui.gd" id="1_l5s6c"]
+[ext_resource type="Script" uid="uid://dcxh0wuahclyd" path="res://scenes/helicopter_ui.gd" id="1_l5s6c"]
 
 [node name="HelicopterUi" type="CanvasLayer"]
 script = ExtResource("1_l5s6c")
@@ -70,13 +70,14 @@ offset_right = 93.0
 offset_bottom = 25.0
 grow_vertical = 2
 
-[node name="Engine Module" type="Label" parent="Engine Modules"]
+[node name="Engine Temp" type="Label" parent="Engine Modules"]
 layout_mode = 2
-text = "Engine Heat"
+text = "Engine Temp"
 
-[node name="Oil Module" type="Label" parent="Engine Modules"]
+[node name="Oil Temp" type="Label" parent="Engine Modules"]
 layout_mode = 2
-text = "Engine Heat"
+text = "Oil Temp: "
 
 [node name="Gas Tank" type="Label" parent="Engine Modules"]
 layout_mode = 2
+text = "Fuel"

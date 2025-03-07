@@ -165,8 +165,8 @@ tracks/5/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ecfcr"]
 _data = {
-"RESET": SubResource("Animation_qdnt6"),
-"move": SubResource("12")
+&"RESET": SubResource("Animation_qdnt6"),
+&"move": SubResource("12")
 }
 
 [sub_resource type="StandardMaterial3D" id="13"]
@@ -414,6 +414,7 @@ emission_ring_axis = Vector3(0, 1, 0)
 emission_ring_height = 0.0
 emission_ring_radius = 0.25
 emission_ring_inner_radius = 0.25
+emission_ring_cone_angle = 90.0
 radial_accel_min = 2.0
 radial_accel_max = 2.0
 collision_mode = 1
@@ -445,6 +446,7 @@ emission_ring_axis = Vector3(0, 1, 0)
 emission_ring_height = 0.0
 emission_ring_radius = 1.6
 emission_ring_inner_radius = 0.0
+emission_ring_cone_angle = 90.0
 gravity = Vector3(0, 1, 0)
 color = Color(1, 1, 1, 0.25098)
 color_ramp = SubResource("GradientTexture1D_bewgf")
@@ -646,7 +648,7 @@ environment = SubResource("11")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
-"": SubResource("AnimationLibrary_ecfcr")
+&"": SubResource("AnimationLibrary_ecfcr")
 }
 autoplay = "move"
 

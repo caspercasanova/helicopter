@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://phqe2hx4f036"]
 
-[ext_resource type="Script" path="res://scenes/weapons/rocket_pod_a.gd" id="1_jsopo"]
+[ext_resource type="Script" uid="uid://g777wdk11y23" path="res://scenes/weapons/rocket_pod_a.gd" id="1_jsopo"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ygwyl"]
 albedo_color = Color(0.458824, 0, 0.737255, 1)

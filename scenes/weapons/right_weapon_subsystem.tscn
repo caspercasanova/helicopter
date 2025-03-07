@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://cv0o027fvpp8g"]
 
-[ext_resource type="Script" path="res://scenes/weapons/helicopter_weapon_subsystem.gd" id="1_2fig1"]
-[ext_resource type="Script" path="res://scenes/helicopter_component.gd" id="1_og026"]
+[ext_resource type="Script" uid="uid://yhkxhjlmjlt6" path="res://scenes/weapons/helicopter_weapon_subsystem.gd" id="1_2fig1"]
+[ext_resource type="Script" uid="uid://6uv1663we1c" path="res://scenes/helicopter_component.gd" id="1_og026"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_gtkvq"]
 size = Vector3(0.8, 0.2, 0.2)
@@ -29,12 +29,11 @@ skeleton = NodePath("../..")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Right Weapon Subsystem Rigid"]
 shape = SubResource("ConvexPolygonShape3D_b8coe")
 
-[node name="Joint" type="JoltHingeJoint3D" parent="Right Weapon Subsystem Rigid"]
-limit_enabled = true
+[node name="Joint" type="HingeJoint3D" parent="Right Weapon Subsystem Rigid"]
 node_b = NodePath("..")
-solver_velocity_iterations = 2
-solver_position_iterations = 2
-transform = Transform3D(1, 1.42109e-14, 0, -1.42109e-14, 1, 0, 0, 0, 1, -5.96047e-08, -2.38419e-07, 1.49012e-08)
+angular_limit/enable = true
+angular_limit/upper = 0.0
+angular_limit/lower = 0.0
 
 [node name="Med Slot" type="Node3D" parent="Right Weapon Subsystem Rigid"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0488485, -0.123369, 0)

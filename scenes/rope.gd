@@ -1,6 +1,6 @@
-extends JoltPinJoint3D
+extends PinJoint3D
 
-@onready var connection_joint: JoltPinJoint3D = $Rope_Rigid/JoltPinJoint3D/Rope_Rigid/JoltPinJoint3D/Rope_Rigid/JoltPinJoint3D/Connection_Point/Connection_Joint
+@onready var connection_joint: PinJoint3D = $Rope_Rigid/PinJoint3D/Rope_Rigid/PinJoint3D/Rope_Rigid/PinJoint3D/Connection_Point/Connection_Joint
 
 var has_object = false
 

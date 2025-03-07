@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://7h0pyus48qyb"]
+
+[ext_resource type="Script" uid="uid://b74q33ipnvcpj" path="res://scenes/armor_penetration/penetration_capsule.gd" id="1_ucwf2"]
+
+[node name="PenetrationCapsule" type="Node3D"]
+script = ExtResource("1_ucwf2")

@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://b68bcx74riv20"]
 
-[ext_resource type="Script" path="res://scenes/weapons/gun.gd" id="1_crkqg"]
+[ext_resource type="Script" uid="uid://c6djypblqbm0o" path="res://scenes/weapons/gun.gd" id="1_crkqg"]
 [ext_resource type="AudioStream" uid="uid://dgtt4d2jahp1r" path="res://scenes/weapons/bullets/fire1.wav" id="2_mbqhy"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_uxo77"]

@@ -16,7 +16,7 @@ var ambient_temp: float = 20.0   # external environment temperature
 var is_leaking: bool = false
 var leak_rate: float = 0.0
 
-var helicopter_parent: Helicopter
+@export var engine_module: Helicopter_Engine_Module
 
 
 signal oil_low(quantity)
@@ -35,9 +35,9 @@ func handle_leak(delta: float):
 	# If the leak is patched in your game logic, is_leaking = false, emit_signal("leak_stopped")
 
 
-## WARNING Subject to change
+### WARNING Subject to change
 func update_oil(delta: float):
-	var load = helicopter.get_engine_load_factor()
+	var load = engine_module.get_engine_load_factor()
 	current_oil_temp += (load * 10) * delta
 	
 	# Natural cooling back to ambient:
@@ -49,24 +49,24 @@ func update_oil(delta: float):
 	if current_oil_temp > max_oil_temp:
 		emit_signal("oil_overheated", current_oil_temp)
 
-
-func _check_oil_levels():
-	if current_oil_quantity < 1.0:
-		emit_signal("oil_low", current_oil_quantity)
-
-
-
-func induce_leak(rate: float):
-	if not is_leaking:
-		is_leaking = true
-		leak_rate = rate
-		emit_signal("leak_detected")
-
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+#
+#func _check_oil_levels():
+	#if current_oil_quantity < 1.0:
+		#emit_signal("oil_low", current_oil_quantity)
+#
+#
+#
+#func induce_leak(rate: float):
+	#if not is_leaking:
+		#is_leaking = true
+		#leak_rate = rate
+		#emit_signal("leak_detected")
+#
+## Called when the node enters the scene tree for the first time.
+#func _ready() -> void:
+	#pass # Replace with function body.
+#
+#
+## Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta: float) -> void:
+	#pass

@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://drwln44m40por"]
 
-[ext_resource type="Script" path="res://scenes/vfx/rocket_smoke.gd" id="1_qaio4"]
+[ext_resource type="Script" uid="uid://ngxyvt8nsdb7" path="res://scenes/vfx/rocket_smoke.gd" id="1_qaio4"]
 
 [sub_resource type="Curve" id="Curve_d61lh"]
 _data = [Vector2(0, 0.26119), 0.0, 0.0, 0, 0, Vector2(0.627706, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.0345349), 0.0, 0.0, 0, 0]

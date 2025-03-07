@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bju36pfggog4t"]
 
-[ext_resource type="Script" path="res://scenes/helipad.gd" id="1_480nc"]
+[ext_resource type="Script" uid="uid://1ml6m7h5deo4" path="res://scenes/helipad.gd" id="1_480nc"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_du65r"]
 points = PackedVector3Array(-2.03175, -0.28169, -2.03175, 2.03168, 0.289627, 2.03175, 2.03168, -0.28169, 2.03175, 2.03168, 0.289627, -2.03175, -2.03175, 0.289627, 2.03175, -2.03175, -0.28169, 2.03175, 2.03168, -0.28169, -2.03175, -2.03175, 0.289627, -2.03175)

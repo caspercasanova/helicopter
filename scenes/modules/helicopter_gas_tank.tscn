@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://bdlbqvv8gif2u"]
 
-[ext_resource type="Script" path="res://scenes/modules/helicopter_gas_tank.gd" id="1_8ty1r"]
+[ext_resource type="Script" uid="uid://cc3p6m88n62qu" path="res://scenes/modules/helicopter_gas_tank.gd" id="1_8ty1r"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wupp6"]
 albedo_color = Color(1, 0.815686, 0.0901961, 1)

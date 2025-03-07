@@ -12,7 +12,12 @@ extends CanvasLayer
 @onready var g_force: Label = $"VBoxContainer/g force"
 @onready var speed: Label = $VBoxContainer/speed
 @onready var hover_mode: Label = $RightBox/hover_mode
-@onready var engine_modules: VBoxContainer = $"Engine Modules"
+
+# Engine Modules
+@onready var engine_temp: Label = $"Engine Modules/Engine Temp"
+@onready var gas_tank: Label = $"Engine Modules/Gas Tank"
+@onready var oil_temp: Label = $"Engine Modules/Oil Temp"
+
 
 
 var helicopter_node: Helicopter = null
@@ -49,3 +54,7 @@ func _process(_delta: float) -> void:
 	g_force.text = (str(round(helicopter_node.g_force)) + "  G")
 	speed.text = (str(round(helicopter_node.speed_km)) + "km/h")
 	hover_mode.text = ("Hover Mode Engaged: "+ str(helicopter_node.hover_mode))
+	engine_temp.text=("engine_temp: "+ str(helicopter_node.engine_module.engine_temp))
+	gas_tank.text=("gas_tank: "+ str(helicopter_node.gas_tank_module.current_fuel_amount))
+	oil_temp.text=("oil_temp: "+ str(helicopter_node.oil_module.current_oil_temp))
+	

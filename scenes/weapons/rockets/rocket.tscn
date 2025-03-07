@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://dd6p0vq8u6rsi"]
 
-[ext_resource type="Script" path="res://scenes/weapons/rockets/rocket.gd" id="1_pgdne"]
+[ext_resource type="Script" uid="uid://1omjewbdm4sb" path="res://scenes/weapons/rockets/rocket.gd" id="1_pgdne"]
 [ext_resource type="PackedScene" uid="uid://drwln44m40por" path="res://scenes/vfx/rocket_smoke.tscn" id="2_1jcbk"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_ueep5"]

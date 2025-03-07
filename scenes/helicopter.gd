@@ -34,25 +34,30 @@ TODO: Systematic Clean Cohesive Refined and Organized Helicopter Modules
 	- Need to figure out if typed dictionaries are a shareable type for 4.4 
 	- Need to be able to manipulate stats easily, it is currently hard to navigate   
 
+TODO: Raycast Penetration Tooling 
+TODO: Get shot from random unit sphere location tool
+TODO: Confirm that we can make penetration code 
+
+
 TODO: Reactive Destruction Health System
 	- TODO: Cleaner version of prop damage -> Component Damage "System"
 
+TODO: Explore potentials for different vehicle attachment systems 
 TODO: Wear and Tear - "Machines Breakdown". IE Fuel, but for modules
 	- Durabilities for Engine, Rotor, 
 	- TODO: Boost
 		- Boosting for too long damages aircraft 
 		- Overheating modules
+
 TODO: Hover mode for picking things up
 	- Balances Helicopter
 	- Limits Roll and Pitch to 5 degrees or something 
 
-
-TODO: Raycast Penetration Tooling 
-TODO: Confirm that we can make penetration code 
-TODO: Explore potentials for different vehicle attachment systems 
+---
 
 TODO: Changes Everything [Mouse Flight](https://github.com/brihernandez/MouseFlight)
 TODO: Weapon Crosshairs / Mouse Flight ? (Prob Not)
+
 Cameras 
 	TODO: Raycast Crosshairs on 2D projection 
 	TODO: Lerp camera to mouse Movement
@@ -87,6 +92,9 @@ TODO: Aerodynamics
 TODO: Solve Joint Bouncyness [May get solved with 4.4]
 TODO: Clean + Polished UI Elements
 TODO: Better Loadout Experience 
+	- Engine Component Loadout Section
+	- TODO: Module Upgrades 
+
 TODO: Eject Function
 
 TODO: UI Signals
@@ -105,6 +113,9 @@ Future Traits that would be awesome once godot implements traits.
 	- Damageable
 
 TODO: Explore Darkness 
+
+
+TODO: Support multiple gas leaks and fuel leaks 
 
 ---
 Dream TODOs:
@@ -131,11 +142,11 @@ TODO: Make shareable DEMO
 @onready var loadout_gui: Node3D = $UI_Controller/LoadoutGUI
 
 ## Used for XRay Mode
-@onready var body: MeshInstance3D = $Fuselage/Body
+@onready var fuselage_mesh: MeshInstance3D = $Fuselage/FuselageMesh
 @onready var mesh_instance_3d_2: MeshInstance3D = $Fuselage/MeshInstance3D2
 @onready var mesh_instance_3d_3: MeshInstance3D = $Fuselage/MeshInstance3D3
 @onready var mesh_instance_3d_4: MeshInstance3D = $Fuselage/MeshInstance3D4
-var fuselage_meshes: Array[MeshInstance3D] = [body, mesh_instance_3d_2, mesh_instance_3d_3, mesh_instance_3d_4]
+var fuselage_meshes: Array[MeshInstance3D] = [fuselage_mesh, mesh_instance_3d_2, mesh_instance_3d_3, mesh_instance_3d_4]
 
 @export var xray_mode: bool = false:
 	set(value):
@@ -159,7 +170,8 @@ func set_meshes_non_transparent():
 
 
 const ROPE = preload("res://scenes/Rope.tscn")
-var rope_instance: JoltPinJoint3D
+#var rope_instance: JoltPinJoint3D
+var rope_instance: PinJoint3D
 
 @export var weight_in_lbs: float = 10000.0
 
@@ -252,29 +264,31 @@ var roll_angle: float:
 
 
 ### Engine
-@export var engine_power_curve: Curve
-var current_engine_power: float = 0.0
-var max_engine_power: float = 1000.0  
- 
-
-var engine_on: bool = false
-var engine_spool_up_complete:bool = false
-var engine_spool_down_complete: bool = false
-var engine_startup_time: float = 5.0
-var engine_shut_off_timer: float = 0
-
-var engine_spool_up_timer: float = 0.0 
-var engine_spool_down_timer: float = 0.0
-
-var is_engine_spooling_up: bool = false  
-var engine_startup_progress: float = 0.0  # Progress through the startup sequence (0.0 to 1.0)
-
-var engine_spool_down_time: float = 0.0 
-var is_engine_spooling_down: bool = false
-var engine_spool_down_progress: float = 0.0
-
-var engine_health: float = 100.0  # Starts at 100, degrades over events
-var engine_health_threshold: float = 25.0  # Threshold below which health is critical
+#@export var engine_power_curve: Curve
+var current_engine_power:
+	get():
+		engine_module.current_engine_power
+#var max_engine_power: float = 1000.0  
+ #
+#
+#var engine_on: bool = false
+#var engine_spool_up_complete:bool = false
+#var engine_spool_down_complete: bool = false
+#var engine_startup_time: float = 5.0
+#var engine_shut_off_timer: float = 0
+#
+#var engine_spool_up_timer: float = 0.0 
+#var engine_spool_down_timer: float = 0.0
+#
+#var is_engine_spooling_up: bool = false  
+#var engine_startup_progress: float = 0.0  # Progress through the startup sequence (0.0 to 1.0)
+#
+#var engine_spool_down_time: float = 0.0 
+#var is_engine_spooling_down: bool = false
+#var engine_spool_down_progress: float = 0.0
+#
+#var engine_health: float = 100.0  # Starts at 100, degrades over events
+#var engine_health_threshold: float = 25.0  # Threshold below which health is critical
 
 # Boost - This is a want, but might need to do with jet instead
 var is_boosting: bool = false
@@ -346,6 +360,7 @@ var ground_effect_multiplier: float:
 @export var engine_module: Helicopter_Engine_Module
 @export var oil_module: Helicopter_Oil_Module
 @export var gas_tank_module: Helicopter_Gas_Tank_Module
+@onready var engine_fire: GPUParticles3D = $EngineFire
 
 
 
@@ -357,8 +372,13 @@ func _ready():
 	self.mass = weight
 	cursor_pointer.top_level = true
 	apply_modules_to_ship()
-	fuselage_meshes = [body, mesh_instance_3d_2, mesh_instance_3d_3, mesh_instance_3d_4]
-	
+	fuselage_meshes = [fuselage_mesh, mesh_instance_3d_2, mesh_instance_3d_3, mesh_instance_3d_4]
+	gas_tank_module.fuel_is_on_fire.connect(engine_fire_emit)
+
+
+
+
+
 
 func _unhandled_input(event):
 	if event is InputEventKey:
@@ -371,15 +391,7 @@ func _input(event: InputEvent):
 		toggle_sky_hook()
 	if Input.is_action_pressed("C"):
 		toggle_hover_mode()
-	#if Input.is_action_pressed("T"):
-		#if current_helicopter_hud == ENUM_HELICOPTER_HUDS.LOADOUT_MENU:
-			#current_helicopter_hud = ENUM_HELICOPTER_HUDS.HELICOPTER_HUD
-			#helicopter_ui.visible = true
-			#loadout_menu.visible = false
-		#else:
-			#current_helicopter_hud = ENUM_HELICOPTER_HUDS.LOADOUT_MENU
-			#loadout_menu.visible = true
-			#helicopter_ui.visible = false
+
 	if event.is_action_pressed("LMB"):
 		print("Firing from _input")
 		fire_small_slot()
@@ -406,18 +418,18 @@ func _process(delta):
 
 	
 	if Input.is_action_pressed("Shift"):
-		if(!engine_on):
-			start_engine()
+		if(!engine_module.engine_on):
+			engine_module.start_engine()
 		collective_pitch += collective_pitch_response
 	elif Input.is_action_pressed("Ctrl"):
 		collective_pitch -= collective_pitch_response
-		if (engine_on and is_on_ground and collective_pitch <= 0):
-			engine_shut_off_timer += delta
-			print("Spooling down progres", engine_shut_off_timer)
-			if engine_shut_off_timer >= 5:
-				engine_shutoff()
+		if (engine_module.engine_on and is_on_ground and collective_pitch <= 0):
+			engine_module.engine_shut_off_timer += delta
+			print("Spooling down progres", engine_module.engine_shut_off_timer)
+			if engine_module.engine_shut_off_timer >= 5:
+				engine_module.engine_shutoff()
 		else: 
-			engine_shut_off_timer = 0
+			engine_module.engine_shut_off_timer = 0
 
 	collective_pitch = clamp(collective_pitch, 0.0, 1.0)
 	
@@ -431,12 +443,17 @@ func _physics_process(delta: float) -> void:
 	determine_if_landed(delta)
 	
 	
-	if is_engine_spooling_up: 
-		engine_spool_up(delta)
-	elif is_engine_spooling_down:
-		engine_spool_down(delta)
+	if engine_module.is_engine_spooling_up: 
+		engine_module.engine_spool_up(delta)
+	elif engine_module.is_engine_spooling_down:
+		engine_module.engine_spool_down(delta)
 	
 
+
+	engine_module.update_engine(delta)
+	oil_module.update_oil(delta)
+	gas_tank_module.handle_fuel_consumption(delta)
+	
 	calculate_relative_altitude()
 	calculate_g_force(delta)
 	
@@ -469,68 +486,14 @@ func handle_roll(delta: float):
 	
 	apply_torque(main_rotor_force_vector)
 	
-	
 
 
-
-
-
-func start_engine():
-	engine_spool_up_timer = 0.0
-	engine_on = true
-	is_engine_spooling_up = true
-	current_engine_power = 0.0
-
-
-func engine_shutoff(): 
-	engine_on = false
-	is_engine_spooling_down = true
-	return
-
-func engine_spool_up(delta: float) -> void:
-	engine_spool_up_timer += delta
-	
-	# Calculate progress as a percentage of startup time, clamped between 0.0 and 1.0
-	engine_startup_progress = clamp(engine_spool_up_timer / engine_startup_time, 0.0, 1.0)
-	
-	# Lerp current engine power towards max engine power based on startup progress
-	current_engine_power = lerp(0.0, max_engine_power, engine_startup_progress)
-
-	print("Spooling Up: ", round(engine_startup_progress * 100), "%")
-
-	# Check if the startup process is complete
-	if engine_startup_progress >= 1:
-		is_engine_spooling_up = false
-		engine_spool_up_complete = true
-		current_engine_power = max_engine_power
-		print("Engine startup complete. Reached full power.")
-
-
-func engine_spool_down(delta: float) -> void:
-	# TODO: There are division by zero bugs in here sometimes
-	print('engine spool down process')
-	engine_spool_down_timer += delta
-
-	engine_spool_down_progress = clamp(engine_spool_down_timer / engine_spool_down_time, 0.0, 1.0)
-	# Lerp current engine power towards 0 based on time
-	current_engine_power = lerp(current_engine_power, 0.0, engine_spool_down_progress)
-	# Check if the startup process is complete
-	
-	print("Spooling Down: ", round(engine_spool_down_progress * 100), "%")
-	
-	if engine_spool_down_progress >= 1:
-		is_engine_spooling_down = false
-		engine_spool_down_complete = true
-		current_engine_power = 0.0
-		print("Engine shutoff complete. Reached zero power.")
-	
-pass
 
 
 
 func update_rotor_speed(delta: float):
 	# Target rotor speed is proportional to engine power
-	var target_rotor_speed = (current_engine_power / max_engine_power) * max_rotor_angular_velocity
+	var target_rotor_speed = (engine_module.current_engine_power / engine_module.max_engine_power) * max_rotor_angular_velocity
 	
 		# Apply a reduction to rotor speed if collective pitch exceeds 80%
 	if collective_pitch > 0.8:
@@ -698,6 +661,7 @@ func spin_rotors(delta: float):
 
 
 # TODO: Change this to a helicopter state variable
+# This needs to be rethought
 # Think of these as a logger. Priotity logging a la "winston npm package"
 # Helicopter Status & Light States
 # Loading, Landing, Repairing, Injured, Green Light
@@ -722,16 +686,16 @@ var flash_timer: float = 0.0
 var flash_duration: float = 0.5  # Half a second for flashing interval
 
 func update_engine_light(delta: float):
-	if engine_health > engine_health_threshold and engine_spool_up_complete and sky_hook_deployed:
+	if engine_module.health > engine_module.critical_health_threshold and engine_module.engine_spool_up_complete and sky_hook_deployed:
 		engine_light.mesh.material.albedo_color = light_colors[HELICOPTER_LIGHT_STATES.CARRYING_OBJECT]
-	elif engine_health < engine_health_threshold:
+	elif engine_module.health < engine_module.critical_health_threshold:
 		# Flashing red light for critical engine health
 		flash_timer += delta
 		if flash_timer >= flash_duration:
 			flashing = !flashing  # Toggle flashing state
 			flash_timer = 0.0
 		engine_light.mesh.material.albedo_color = light_colors[HELICOPTER_LIGHT_STATES.CRITICAL] if flashing else light_colors[HELICOPTER_LIGHT_STATES.LANDED]  # Flash red and white
-	elif engine_spool_up_complete:
+	elif engine_module.engine_spool_up_complete:
 		# Set the engine light to green when engine power is sufficient for lift
 		engine_light.mesh.material.albedo_color = light_colors[HELICOPTER_LIGHT_STATES.GREEN_LIGHT]
 	else:
@@ -1165,3 +1129,7 @@ func react_to_damage():
 
 
 #endregion
+
+
+func engine_fire_emit():
+	engine_fire.emitting = true

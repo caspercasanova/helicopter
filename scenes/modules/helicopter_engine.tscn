@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://dnuecr75ofq6y"]
 
-[ext_resource type="Script" path="res://scenes/modules/helicopter_engine.gd" id="1_ltuih"]
+[ext_resource type="Script" uid="uid://coh6irbo8d7h1" path="res://scenes/modules/helicopter_engine.gd" id="1_ltuih"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tuja8"]
 albedo_color = Color(0.219608, 0.372549, 0.380392, 1)
