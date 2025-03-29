@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c4ju77nxcrrku"
-path.s3tc="res://.godot/imported/checker.png-89c63c58551423f50f7398becb9f4363.s3tc.ctex"
+path.s3tc="res://.godot/imported/checker.png-75545569d7b6b8bd59ee56d2b0c7edbe.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://scenes/armor_penetration/checker.png"
-dest_files=["res://.godot/imported/checker.png-89c63c58551423f50f7398becb9f4363.s3tc.ctex"]
+source_file="res://scenes/checker.png"
+dest_files=["res://.godot/imported/checker.png-75545569d7b6b8bd59ee56d2b0c7edbe.s3tc.ctex"]
 
 [params]
 

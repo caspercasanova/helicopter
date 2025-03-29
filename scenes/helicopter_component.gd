@@ -6,7 +6,6 @@ class_name Helicopter_Component extends RigidBody3D
 
 const COLLISION_DAMAGE_SPEED_THRESHOLD = 0.01
 @export var health: int = 100
-#@onready var joint: JoltHingeJoint3D = $Joint
 @onready var joint: HingeJoint3D
 
 

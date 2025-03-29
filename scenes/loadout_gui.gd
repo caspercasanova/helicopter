@@ -140,35 +140,35 @@ func rotate_area_to_billboard() -> void:
 
 func _on_left_weapon_subsystem_slot_a_item_selected(index: int) -> void:
 	match index:
-		0: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.SMALL_WEAPONS_MODULE_NAMES.NONE)
-		1: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.SMALL_WEAPONS_MODULE_NAMES.GUN_A)
-		2: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.SMALL_WEAPONS_MODULE_NAMES.GUN_B)
-		3: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.SMALL_WEAPONS_MODULE_NAMES.GUN_C)
+		0: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.SMALL_WEAPONS.NONE)
+		1: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.SMALL_WEAPONS.GUN_A)
+		2: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.SMALL_WEAPONS.GUN_B)
+		3: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.SMALL_WEAPONS.GUN_C)
 	pass 
 
 
 func _on_right_weapon_subsystem_slot_a_item_selected(index: int) -> void:
 	match index:
-		0: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.SMALL_WEAPONS_MODULE_NAMES.NONE)
-		1: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.SMALL_WEAPONS_MODULE_NAMES.GUN_A)
-		2: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.SMALL_WEAPONS_MODULE_NAMES.GUN_B)
-		3: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.SMALL_WEAPONS_MODULE_NAMES.GUN_C)
+		0: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.SMALL_WEAPONS.NONE)
+		1: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.SMALL_WEAPONS.GUN_A)
+		2: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.SMALL_WEAPONS.GUN_B)
+		3: helicopter.update_subsystem_small_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.SMALL_WEAPONS.GUN_C)
 	pass
 
 
 func _on_left_weapon_subsystem_slot_b_item_selected(index: int) -> void:
 	match index:
-		0: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.MEDIUM_WEAPONS_MODULE_NAMES.NONE)
-		1: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_A)
-		2: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_B)
+		0: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.MEDIUM_WEAPONS.NONE)
+		1: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.MEDIUM_WEAPONS.ROCKET_POD_A)
+		2: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.LEFT, Helicopter.MEDIUM_WEAPONS.ROCKET_POD_B)
 	pass
 
 
 func _on_right_weapon_subsystem_slot_b_item_selected(index: int) -> void:
 	match index:
-		0: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.MEDIUM_WEAPONS_MODULE_NAMES.NONE)
-		1: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_A)
-		2: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_B)
+		0: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.MEDIUM_WEAPONS.NONE)
+		1: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.MEDIUM_WEAPONS.ROCKET_POD_A)
+		2: helicopter.update_subsystem_medium_slot(Helicopter_Weapon_Subsystem.SIDE.RIGHT, Helicopter.MEDIUM_WEAPONS.ROCKET_POD_B)
 	pass
 	
 

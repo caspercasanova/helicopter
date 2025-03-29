@@ -7,7 +7,7 @@
 [ext_resource type="Texture2D" uid="uid://dcctv40rba8hj" path="res://addons/kenney_prototype_tools/textures/dark/texture_05.png" id="5_u7n2k"]
 [ext_resource type="PackedScene" uid="uid://di1np6mf845jg" path="res://scenes/helicopter.tscn" id="6_hfffq"]
 [ext_resource type="PackedScene" uid="uid://cym4y2mt8yvyy" path="res://scenes/RigidBox.tscn" id="7_feefi"]
-[ext_resource type="PackedScene" uid="uid://bju36pfggog4t" path="res://scenes/Helipad.tscn" id="8_06t6e"]
+[ext_resource type="PackedScene" uid="uid://bju36pfggog4t" path="res://scenes/helipad.tscn" id="8_06t6e"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_v3d8d"]
 

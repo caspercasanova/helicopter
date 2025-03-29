@@ -89,7 +89,7 @@ TODO: Aerodynamics
 	- TODO: Maybe split the lift vector by the prop count and apply every revolution? (maybe not idk) "Force-Per-Prop" Lite™ Implementation
 
 
-TODO: Solve Joint Bouncyness [May get solved with 4.4]
+TODO: Solve Joint Bouncyness [May get solved with 4.4] -> Not Solved FUCK
 TODO: Clean + Polished UI Elements
 TODO: Better Loadout Experience 
 	- Engine Component Loadout Section
@@ -269,7 +269,7 @@ var current_engine_power:
 	get():
 		engine_module.current_engine_power
 #var max_engine_power: float = 1000.0  
- #
+#
 #
 #var engine_on: bool = false
 #var engine_spool_up_complete:bool = false
@@ -328,7 +328,7 @@ var tip_velocity: float:
 
 
 
-
+@export_subgroup("Aerodynamics")
 ### Lift Forces
 @export var total_drag_curve: Curve
 @export var max_lift_coefficient: float = 1.5  # Maximum lift at full collective pitch
@@ -356,7 +356,7 @@ var ground_effect_multiplier: float:
 @export var max_speed_for_control: float = 10.0  # Maximum speed before control authority is reduced
 
 
-@export_category("Helicopter Modules")
+@export_subgroup("Helicopter Modules")
 @export var engine_module: Helicopter_Engine_Module
 @export var oil_module: Helicopter_Oil_Module
 @export var gas_tank_module: Helicopter_Gas_Tank_Module
@@ -612,8 +612,6 @@ func calculate_g_force(delta: float):
 	g_force = acceleration / GRAVITY
 	previous_velocity = linear_velocity  # Update previous velocity for the next frame
 
-	if debug:
-		print("G-force:  ", g_force)
 	
 	return g_force
 
@@ -783,31 +781,31 @@ const GUN_A = preload("res://scenes/weapons/gun_a.tscn")
 const GUN_B = preload("res://scenes/weapons/gun_b.tscn")
 const GUN_C = preload("res://scenes/weapons/gun_c.tscn")
 
-enum SMALL_WEAPONS_MODULE_NAMES {
+enum SMALL_WEAPONS {
 	NONE,
 	GUN_A,
 	GUN_B,
 	GUN_C,
 }
 
-var small_weapons_modules = {
-	SMALL_WEAPONS_MODULE_NAMES.GUN_A: GUN_A,
-	SMALL_WEAPONS_MODULE_NAMES.GUN_B: GUN_B,
-	SMALL_WEAPONS_MODULE_NAMES.GUN_C: GUN_C,
+var small_weapons_scenes = {
+	SMALL_WEAPONS.GUN_A: GUN_A,
+	SMALL_WEAPONS.GUN_B: GUN_B,
+	SMALL_WEAPONS.GUN_C: GUN_C,
 }
 
 const ROCKET_POD_A = preload("res://scenes/weapons/rocket_pod_a.tscn")
 const ROCKET_POD_B = preload("res://scenes/weapons/rocket_pod_b.tscn")
 
-enum MEDIUM_WEAPONS_MODULE_NAMES {
+enum MEDIUM_WEAPONS {
 	NONE,
 	ROCKET_POD_A,
 	ROCKET_POD_B
 }
 
-var medium_weapons_modules = {
-	MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_A: ROCKET_POD_A,
-	MEDIUM_WEAPONS_MODULE_NAMES.ROCKET_POD_B: ROCKET_POD_B
+var medium_weapons_scenes = {
+	MEDIUM_WEAPONS.ROCKET_POD_A: ROCKET_POD_A,
+	MEDIUM_WEAPONS.ROCKET_POD_B: ROCKET_POD_B
 }
 
 
@@ -829,12 +827,12 @@ var left_weapon_subsystem: Helicopter_Weapon_Subsystem
 var right_weapon_subsystem: Helicopter_Weapon_Subsystem
 
 
-@export var left_weapon_system_small_slot: SMALL_WEAPONS_MODULE_NAMES = SMALL_WEAPONS_MODULE_NAMES.NONE
-@export var left_weapon_system_medium_slot: MEDIUM_WEAPONS_MODULE_NAMES = MEDIUM_WEAPONS_MODULE_NAMES.NONE
-@export var right_weapon_system_small_slot: SMALL_WEAPONS_MODULE_NAMES = SMALL_WEAPONS_MODULE_NAMES.NONE
-@export var right_weapon_system_medium_slot: MEDIUM_WEAPONS_MODULE_NAMES = MEDIUM_WEAPONS_MODULE_NAMES.NONE
+@export var left_weapon_system_small_slot: SMALL_WEAPONS = SMALL_WEAPONS.NONE
+@export var left_weapon_system_medium_slot: MEDIUM_WEAPONS = MEDIUM_WEAPONS.NONE
+@export var right_weapon_system_small_slot: SMALL_WEAPONS = SMALL_WEAPONS.NONE
+@export var right_weapon_system_medium_slot: MEDIUM_WEAPONS = MEDIUM_WEAPONS.NONE
 
-var current_weapons = {
+var current_weapons :Dictionary = {
 	left_weapon_system_small_slot: null,
 	left_weapon_system_medium_slot: null,
 	right_weapon_system_small_slot: null,
@@ -880,17 +878,17 @@ func remove_subsystem_from_helo(subsystem_side: Helicopter_Weapon_Subsystem.SIDE
 			nodes.queue_free()
 
 
-func update_subsystem_small_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: SMALL_WEAPONS_MODULE_NAMES):
+func update_subsystem_small_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: SMALL_WEAPONS):
 	if side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
 		for nodes in left_weapon_subsystem.small_slot.get_children():
 			nodes.queue_free()
 		
-		if item == SMALL_WEAPONS_MODULE_NAMES.NONE:
+		if item == SMALL_WEAPONS.NONE:
 			current_weapons.left_weapon_system_small_slot = null
 			return
 		
-		var node = small_weapons_modules[item].instantiate()
+		var node = small_weapons_scenes[item].instantiate()
 		left_weapon_subsystem.small_slot.add_child(node)
 		current_weapons.left_weapon_system_small_slot = node
 	elif side == Helicopter_Weapon_Subsystem.SIDE.RIGHT:
@@ -898,26 +896,26 @@ func update_subsystem_small_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: S
 		for nodes in right_weapon_subsystem.small_slot.get_children():
 			nodes.queue_free()
 		
-		if item == SMALL_WEAPONS_MODULE_NAMES.NONE:
+		if item == SMALL_WEAPONS.NONE:
 			current_weapons.right_weapon_system_small_slot = null
 			return
 		
-		var node = small_weapons_modules[item].instantiate()
+		var node = small_weapons_scenes[item].instantiate()
 		right_weapon_subsystem.small_slot.add_child(node) 
 		current_weapons.right_weapon_system_small_slot = node
 	return
 
-func update_subsystem_medium_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: MEDIUM_WEAPONS_MODULE_NAMES):
+func update_subsystem_medium_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: MEDIUM_WEAPONS):
 	if side == Helicopter_Weapon_Subsystem.SIDE.LEFT:
 		assert(has_left_subsystem, "Need to have a left subsystem to add weapon")
 		for nodes in left_weapon_subsystem.medium_slot.get_children():
 			nodes.queue_free()
 		
-		if item == MEDIUM_WEAPONS_MODULE_NAMES.NONE:
+		if item == MEDIUM_WEAPONS.NONE:
 			current_weapons.left_weapon_system_medium_slot = null
 			return
 		
-		var node = medium_weapons_modules[item].instantiate()
+		var node = medium_weapons_scenes[item].instantiate()
 		left_weapon_subsystem.medium_slot.add_child(node)
 		current_weapons.left_weapon_system_medium_slot = node
 		
@@ -926,11 +924,11 @@ func update_subsystem_medium_slot(side: Helicopter_Weapon_Subsystem.SIDE, item: 
 		for nodes in right_weapon_subsystem.medium_slot.get_children():
 			nodes.queue_free()
 		
-		if item == MEDIUM_WEAPONS_MODULE_NAMES.NONE:
+		if item == MEDIUM_WEAPONS.NONE:
 			current_weapons.right_weapon_system_medium_slot = null
 			return
 		
-		var node = medium_weapons_modules[item].instantiate()
+		var node = medium_weapons_scenes[item].instantiate()
 		right_weapon_subsystem.medium_slot.add_child(node)
 		current_weapons.right_weapon_system_medium_slot = node
 	return
@@ -1000,8 +998,13 @@ func apply_modules_to_ship():
 	#
 	#return null
 
+
+
 """
-Ammo
+Inventory
+"""
+"""
+Ammo - maybe put the ammo on the weapon?
 """
 func replenish_ammo():
 	print("Replenish ammo function")

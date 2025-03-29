@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3 uid="uid://y4vkt8j3gnnj"]
 
-[ext_resource type="Texture2D" uid="uid://c4ju77nxcrrku" path="res://scenes/armor_penetration/checker.png" id="1_gpvvx"]
+[ext_resource type="Texture2D" uid="uid://c4ju77nxcrrku" path="res://scenes/checker.png" id="1_gpvvx"]
 [ext_resource type="PackedScene" uid="uid://di1np6mf845jg" path="res://scenes/helicopter.tscn" id="2_ofhb0"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1iahk"]

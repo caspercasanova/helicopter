@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://cym4y2mt8yvyy"]
 
-[ext_resource type="PackedScene" uid="uid://yi0r5myhchbl" path="res://scenes/Latch_Point.tscn" id="1_eujg6"]
+[ext_resource type="PackedScene" uid="uid://yi0r5myhchbl" path="res://scenes/latch_point.tscn" id="1_eujg6"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_b6lnf"]
 
