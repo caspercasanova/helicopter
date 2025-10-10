@@ -1,0 +1,115 @@
+[gd_scene load_steps=11 format=3 uid="uid://y4vkt8j3gnnj"]
+
+[ext_resource type="Texture2D" uid="uid://c4ju77nxcrrku" path="res://scenes/checker.png" id="1_gpvvx"]
+[ext_resource type="PackedScene" uid="uid://di1np6mf845jg" path="res://scenes/helicopter/helicopter.tscn" id="2_ofhb0"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1iahk"]
+
+[sub_resource type="Sky" id="Sky_hp8l5"]
+sky_material = SubResource("ProceduralSkyMaterial_1iahk")
+
+[sub_resource type="Environment" id="Environment_wm61f"]
+background_mode = 2
+sky = SubResource("Sky_hp8l5")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o2hwl"]
+albedo_texture = ExtResource("1_gpvvx")
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p4trl"]
+albedo_color = Color(1, 0.27451, 1, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_jqbwi"]
+material = SubResource("StandardMaterial3D_p4trl")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lkj1p"]
+albedo_color = Color(0.282353, 1, 1, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_gicit"]
+material = SubResource("StandardMaterial3D_lkj1p")
+
+[node name="VehicleSystemTest" type="Node3D"]
+
+[node name="ArmorPenExamples" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_wm61f")
+
+[node name="CSGCombiner3D" type="CSGCombiner3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.679785, 0)
+use_collision = true
+
+[node name="Floor" type="CSGBox3D" parent="CSGCombiner3D"]
+size = Vector3(128, 1, 128)
+material = SubResource("StandardMaterial3D_o2hwl")
+
+[node name="TestName" type="Label" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -199.0
+offset_top = -34.0
+offset_right = 185.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "Test"
+horizontal_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="Next" type="Button" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -141.0
+offset_top = -63.0
+offset_right = -44.0
+offset_bottom = -21.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "Next >>"
+metadata/_edit_use_anchors_ = true
+
+[node name="Previous" type="Button" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 41.0
+offset_top = -63.0
+offset_right = 183.0
+offset_bottom = -21.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "<< Previous
+"
+metadata/_edit_use_anchors_ = true
+
+[node name="Helicopter" parent="." instance=ExtResource("2_ofhb0")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, -0.767126, 2.88692, -17.7803)
+
+[node name="Testers" type="Node3D" parent="."]
+
+[node name="EngineModule" type="Node3D" parent="Testers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.459323, 0)
+
+[node name="CSGMesh3D" type="CSGMesh3D" parent="Testers/EngineModule"]
+mesh = SubResource("CylinderMesh_jqbwi")
+
+[node name="OilModule" type="Node3D" parent="Testers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.459323, -7.908)
+
+[node name="CSGMesh3D" type="CSGMesh3D" parent="Testers/OilModule"]
+mesh = SubResource("BoxMesh_gicit")
+
+[node name="StrutModule" type="Node3D" parent="Testers"]
+
+[node name="PropModule" type="Node3D" parent="Testers"]
+
+[node name="CameraHolder" type="Node3D" parent="."]
+
+[node name="RotationX" type="Node3D" parent="CameraHolder"]
+
+[node name="Camera3D" type="Camera3D" parent="CameraHolder/RotationX"]

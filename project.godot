@@ -12,12 +12,12 @@ config_version=5
 
 config/name="Helicopter"
 run/main_scene="uid://bp7xy2o1ccgsl"
-config/features=PackedStringArray("4.4", "Forward Plus")
+config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-UI="*res://scenes/UI.gd"
+UI="*res://scenes/helicopter/ui/UI.gd"
 
 [display]
 
@@ -30,7 +30,7 @@ movie_writer/movie_file="C:/Users/nhjlo/godot/helicopter/devlog.avi"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/Gizmo3DScript/plugin.cfg", "res://addons/tattomoosa.spinner/plugin.cfg")
+enabled=PackedStringArray("res://addons/Free fly camera/plugin.cfg", "res://addons/Gizmo3DScript/plugin.cfg", "res://addons/tattomoosa.spinner/plugin.cfg")
 
 [input]
 

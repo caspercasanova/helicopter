@@ -1,22 +1,17 @@
-[gd_scene load_steps=17 format=3 uid="uid://bp7xy2o1ccgsl"]
+[gd_scene load_steps=12 format=3 uid="uid://bp7xy2o1ccgsl"]
 
-[ext_resource type="Texture2D" uid="uid://bjki20y2o2s7c" path="res://addons/kenney_prototype_tools/textures/dark/texture_01.png" id="1_2xps0"]
-[ext_resource type="Texture2D" uid="uid://ntiu66svity3" path="res://addons/kenney_prototype_tools/textures/red/texture_01.png" id="2_w5hpf"]
-[ext_resource type="Texture2D" uid="uid://djugnb5hh60e1" path="res://addons/kenney_prototype_tools/textures/green/texture_01.png" id="3_xu7oa"]
-[ext_resource type="Texture2D" uid="uid://bf3ywp0eda70m" path="res://addons/kenney_prototype_tools/textures/orange/texture_02.png" id="4_vcpy1"]
-[ext_resource type="Texture2D" uid="uid://dcctv40rba8hj" path="res://addons/kenney_prototype_tools/textures/dark/texture_05.png" id="5_u7n2k"]
-[ext_resource type="PackedScene" uid="uid://di1np6mf845jg" path="res://scenes/helicopter.tscn" id="6_hfffq"]
+[ext_resource type="PackedScene" uid="uid://di1np6mf845jg" path="res://scenes/helicopter/helicopter.tscn" id="6_hfffq"]
 [ext_resource type="PackedScene" uid="uid://cym4y2mt8yvyy" path="res://scenes/RigidBox.tscn" id="7_feefi"]
 [ext_resource type="PackedScene" uid="uid://bju36pfggog4t" path="res://scenes/helipad.tscn" id="8_06t6e"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_v3d8d"]
 
-[sub_resource type="Sky" id="Sky_snrf3"]
+[sub_resource type="Sky" id="Sky_tipki"]
 sky_material = SubResource("ProceduralSkyMaterial_v3d8d")
 
 [sub_resource type="Environment" id="Environment_hknw3"]
 background_mode = 2
-sky = SubResource("Sky_snrf3")
+sky = SubResource("Sky_tipki")
 ssr_enabled = true
 ssao_enabled = true
 ssao_power = 5.40752
@@ -26,32 +21,27 @@ volumetric_fog_gi_inject = 5.75
 volumetric_fog_detail_spread = 2.04906
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4yxqb"]
-albedo_texture = ExtResource("1_2xps0")
 uv1_triplanar = true
 uv2_triplanar = true
 uv2_world_triplanar = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gyxum"]
-albedo_texture = ExtResource("2_w5hpf")
 uv1_triplanar = true
 uv1_world_triplanar = true
 uv2_triplanar = true
 uv2_world_triplanar = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hfpmy"]
-albedo_texture = ExtResource("3_xu7oa")
 uv1_triplanar = true
 uv1_world_triplanar = true
 uv2_triplanar = true
 uv2_world_triplanar = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c4nao"]
-albedo_texture = ExtResource("4_vcpy1")
 uv1_triplanar = true
 uv1_world_triplanar = true
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jpwa2"]
-albedo_texture = ExtResource("5_u7n2k")
 uv1_triplanar = true
 uv1_world_triplanar = true
 

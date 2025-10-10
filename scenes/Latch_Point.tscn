@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://yi0r5myhchbl"]
-
-[ext_resource type="Script" uid="uid://bsde1bui42g4e" path="res://scenes/latch_point.gd" id="1_sbjwt"]
-
-[node name="Latch_Point" type="Node3D"]
-script = ExtResource("1_sbjwt")

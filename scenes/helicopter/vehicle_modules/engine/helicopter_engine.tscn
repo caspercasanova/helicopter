@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://dnuecr75ofq6y"]
+
+[ext_resource type="Script" uid="uid://coh6irbo8d7h1" path="res://scenes/helicopter/vehicle_modules/engine/helicopter_engine.gd" id="1_ltuih"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tuja8"]
+albedo_color = Color(0.219608, 0.372549, 0.380392, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_h563j"]
+material = SubResource("StandardMaterial3D_tuja8")
+top_radius = 0.15
+bottom_radius = 0.15
+height = 0.5
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_sbudn"]
+points = PackedVector3Array(0.147433, 0.240639, 0.02709, -0.146139, -0.24112, -0.0330917, -0.145765, -0.240507, 0.0345642, -0.146139, 0.24112, -0.0330917, 0.0573016, -0.241176, -0.138635, 0.02709, -0.240639, 0.147433, -0.0553498, 0.23962, 0.139323, -0.0330917, 0.24112, -0.146139, 0.147433, -0.240639, 0.02709, 0.123607, 0.238192, -0.0847949, 0.0858465, 0.236701, 0.122838, -0.0940608, -0.242854, -0.116833, -0.0847892, -0.238255, 0.123611, -0.122293, 0.238777, 0.0865925, 0.139328, -0.239679, -0.0553349, 0.122838, -0.236701, 0.0858465, 0.0573016, 0.241176, -0.138635, -0.123062, 0.240268, -0.085541, -0.0330917, -0.24112, -0.146139, 0.02709, 0.240639, 0.147433, -0.0255724, -0.241014, 0.147662, 0.147666, 0.241021, -0.0255444, -0.145765, 0.240507, 0.0345642, 0.0865793, -0.23874, -0.122303, -0.0940608, 0.242854, -0.116833, 0.122838, 0.236701, 0.0858465, 0.0858465, -0.236701, 0.122838, -0.122293, -0.238777, 0.0865925, 0.0345913, 0.240496, -0.145759, -0.123062, -0.240268, -0.085541, -0.0932701, 0.24083, 0.117411, 0.147666, -0.241021, -0.0255444)
+
+[node name="HelicopterEngine" type="Node3D"]
+script = ExtResource("1_ltuih")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CylinderMesh_h563j")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("ConvexPolygonShape3D_sbudn")

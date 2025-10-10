@@ -1,0 +1,150 @@
+[gd_scene load_steps=6 format=3 uid="uid://b4k4c3jm86x3l"]
+
+[ext_resource type="Script" uid="uid://bdr4r4fmdspyg" path="res://scenes/helicopter/ui/loadout_gui.gd" id="1_oh5vk"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_bqhir"]
+size = Vector2(3, 2)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_5avoi"]
+viewport_path = NodePath("SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jr5uj"]
+resource_local_to_scene = true
+transparency = 1
+shading_mode = 0
+albedo_texture = SubResource("ViewportTexture_5avoi")
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ng28y"]
+size = Vector3(3, 2, 0.1)
+
+[node name="LoadoutGUI" type="Node3D"]
+script = ExtResource("1_oh5vk")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+gui_embed_subwindows = true
+
+[node name="Control" type="Control" parent="SubViewport"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Panel" type="Panel" parent="SubViewport/Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SubViewport/Control/Panel"]
+layout_mode = 0
+offset_left = 4.0
+offset_top = 158.0
+offset_right = 487.0
+offset_bottom = 525.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SubViewport/Control/Panel/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Left Weapon Subsystem Slot A Label" type="Label" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+text = "Left Weapon Subsystem Slot A"
+
+[node name="Left Weapon Subsystem Slot A" type="OptionButton" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+selected = 0
+item_count = 4
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "Gun A"
+popup/item_1/id = 1
+popup/item_2/text = "Gun B"
+popup/item_2/id = 2
+popup/item_3/text = "Gun C"
+popup/item_3/id = 3
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="Right Weapon Subsystem Slot A Label" type="Label" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+text = "Right Weapon Subsystem Slot A"
+
+[node name="Right Weapon Subsystem Slot A" type="OptionButton" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+selected = 0
+item_count = 4
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "Gun A"
+popup/item_1/id = 1
+popup/item_2/text = "Gun B"
+popup/item_2/id = 2
+popup/item_3/text = "Gun C"
+popup/item_3/id = 3
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="SubViewport/Control/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="Left Weapon Subsystem Slot B Label" type="Label" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2/VBoxContainer3"]
+layout_mode = 2
+text = "Left Weapon Subsystem Slot B"
+
+[node name="Left Weapon Subsystem Slot B" type="OptionButton" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2/VBoxContainer3"]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "Rocket A"
+popup/item_1/id = 1
+popup/item_2/text = "Rocket B"
+popup/item_2/id = 2
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+
+[node name="Right Weapon Subsystem Slot B Label" type="Label" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2/VBoxContainer4"]
+layout_mode = 2
+text = "Right Weapon Subsystem Slot B"
+
+[node name="Right Weapon Subsystem Slot B" type="OptionButton" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2/VBoxContainer4"]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "None"
+popup/item_0/id = 0
+popup/item_1/text = "Rocket A"
+popup/item_1/id = 1
+popup/item_2/text = "Rocket  B"
+popup/item_2/id = 2
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="SubViewport/Control/Panel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Left Weapon Subsystem Slot A Label" type="Label" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+text = "Toggle X Ray Mode"
+
+[node name="Left Weapon Subsystem Slot A" type="CheckButton" parent="SubViewport/Control/Panel/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+
+[node name="Quad" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_bqhir")
+surface_material_override/0 = SubResource("StandardMaterial3D_jr5uj")
+
+[node name="Area3D" type="Area3D" parent="Quad"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Quad/Area3D"]
+shape = SubResource("BoxShape3D_ng28y")
+
+[connection signal="item_selected" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer/VBoxContainer/Left Weapon Subsystem Slot A" to="." method="_on_left_weapon_subsystem_slot_a_item_selected"]
+[connection signal="item_selected" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer/VBoxContainer2/Right Weapon Subsystem Slot A" to="." method="_on_right_weapon_subsystem_slot_a_item_selected"]
+[connection signal="item_selected" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2/VBoxContainer3/Left Weapon Subsystem Slot B" to="." method="_on_left_weapon_subsystem_slot_b_item_selected"]
+[connection signal="item_selected" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer2/VBoxContainer4/Right Weapon Subsystem Slot B" to="." method="_on_right_weapon_subsystem_slot_b_item_selected"]
+[connection signal="toggled" from="SubViewport/Control/Panel/VBoxContainer/HBoxContainer3/Left Weapon Subsystem Slot A" to="." method="_on_left_weapon_subsystem_slot_a_toggled"]
